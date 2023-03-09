@@ -233,7 +233,7 @@ private fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
                     PacketSender(ms, bytesToSend, group, port), 0, 3000
                 ) //FIXME state.settings.sendingPeriod
                 while (state.isRunning) {
-                    println("INFO: listening...")
+                    println("INFO: listening....")
                     ms.receive(packetToReceive)
                     val nameAndMac = String(buffer, 0, packetToReceive.length).getNameAndMac()
                     val device = Device(
