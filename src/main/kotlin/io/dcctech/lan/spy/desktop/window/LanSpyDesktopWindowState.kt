@@ -1,9 +1,10 @@
 /*
- * Copyright © 2022-2023, DCCTech, Hungary and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
  */
 
 package io.dcctech.lan.spy.desktop.window
 
+import androidx.compose.material.Colors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
@@ -11,11 +12,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import io.dcctech.lan.spy.desktop.DesktopApplicationState
+import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.common.Settings
-import io.dcctech.lan.spy.desktop.models.Device
-import io.dcctech.lan.spy.desktop.models.DeviceStatus
-import io.dcctech.lan.spy.desktop.util.AlertDialogResult
-import io.dcctech.lan.spy.desktop.util.formatter
+import io.dcctech.lan.spy.desktop.common.theme.DarkColors
+import io.dcctech.lan.spy.desktop.data.AlertDialogResult
+import io.dcctech.lan.spy.desktop.data.Device
+import io.dcctech.lan.spy.desktop.data.DeviceStatus
+import io.dcctech.lan.spy.desktop.data.LogLevel
+import io.dcctech.lan.spy.desktop.formatter
+import io.dcctech.lan.spy.desktop.getNameAndMac
+import io.dcctech.lan.spy.desktop.log
 import kotlinx.coroutines.*
 import java.net.DatagramPacket
 import java.net.InetAddress
@@ -49,6 +55,14 @@ class LanSpyDesktopWindowState(
         private set
 
     private var _text by mutableStateOf("")
+    private var _theme by mutableStateOf(DarkColors)
+
+    var theme: Colors
+        get() = _theme
+        set(value) {
+//            AppTheme(useDarkTheme = (value == DarkColors)) { LANSpyDesktopWindow(state = this) }
+            _theme = value
+        }
 
     var text: String
         get() = _text
@@ -70,12 +84,12 @@ class LanSpyDesktopWindowState(
     fun start() {
         isRunning = true
         discoveryOfServerModules(state = this)
-        setProcessState("-> is running...")
+        setProcessState(R.running)
     }
 
     fun stop() {
         isRunning = false
-        setProcessState("-> has stopped!")
+        setProcessState(R.stopped)
     }
 
     fun reset() {
@@ -86,7 +100,7 @@ class LanSpyDesktopWindowState(
 
     suspend fun run() {
         if (path != null) {
-            println("INFO: path $path")
+            LogLevel.INFO.log("${R.path}: $path")
             open(path!!)
         } else {
             initNew()
@@ -100,7 +114,7 @@ class LanSpyDesktopWindowState(
                 delay(5000)
                 checkDevices(this)
             } catch (t: Throwable) {
-                println(t.localizedMessage)
+                LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
         }
     }
@@ -116,12 +130,14 @@ class LanSpyDesktopWindowState(
             isInit = true
         } catch (e: Exception) {
             e.printStackTrace()
-            text = "Cannot read $path"
+            val msg = "${R.cannotOpenThisPath}: $path"
+            LogLevel.ERROR.log("$msg \n ${e.printStackTrace()}")
+            text = msg
         }
     }
 
     private fun initNew() {
-        _text = "LANSpy Desktop"
+        _text = R.appName
         isInit = true
         isRunning = false
     }
@@ -133,11 +149,11 @@ class LanSpyDesktopWindowState(
     suspend fun helpDialog() {
         when (helpDialog.awaitResult()) {
             AlertDialogResult.Yes -> {
-                println("INFO: We're glad we were able to helped ...")
+                LogLevel.DEBUG.log(R.successfulAssistance)
             }
 
             AlertDialogResult.No -> {
-                println("INFO: We're sorry to hear that you are not satisfied with our assistance service....")
+                LogLevel.WARNING.log(R.notSatisfiedWithOurAssistance)
             }
 
             AlertDialogResult.Cancel -> Unit
@@ -147,7 +163,7 @@ class LanSpyDesktopWindowState(
     suspend fun preferencesDialog() {
         when (preferencesDialog.awaitResult()) {
             AlertDialogResult.Yes -> {
-                println("INFO: It will be finished!")
+                LogLevel.INFO.log(R.hasBeenFinished)
             }
 
             else -> Unit
@@ -168,18 +184,23 @@ class LanSpyDesktopWindowState(
         resultList[device.address] = device
     }
 
-    fun setStatus(key: String, status: DeviceStatus) {
+    fun setStatus(key: String, newStatus: DeviceStatus) {
         var oldStatus: DeviceStatus? = null
         resultList[key]?.let {
             oldStatus = it.status
-            it.status = status
-            println("UPDATED: the status of the device with address $key has changed from $oldStatus to $status")
+            it.status = newStatus
+            val msg = "${R.update}: ${R.statusHasChanged}"
+                .replace("key", key)
+                .replace("oldStatus", "$oldStatus")
+                .replace("newStatus", "$newStatus")
+
+            LogLevel.INFO.log(msg)
         }
     }
 
     fun removeDeviceFromList(key: String) {
         resultList.remove(key)
-        println("INFO: remove the device with address: $key from the list")
+        LogLevel.INFO.log(R.removeDevice.replace("key", key))
     }
 
     private suspend fun areYouSure(): Boolean {
@@ -233,7 +254,7 @@ private fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
                     PacketSender(ms, bytesToSend, group, port), 0, 3000
                 ) //FIXME state.settings.sendingPeriod
                 while (state.isRunning) {
-                    println("INFO: listening....")
+                    LogLevel.DEBUG.log(R.listening)
                     ms.receive(packetToReceive)
                     val nameAndMac = String(buffer, 0, packetToReceive.length).getNameAndMac()
                     val device = Device(
@@ -250,20 +271,8 @@ private fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
             }
         }
     } catch (t: Throwable) {
-        println(t.localizedMessage)
+        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
     }
-}
-
-fun String.getNameAndMac(): Pair<String, String?> {
-
-    val parts = this.split("\n")
-    val name = parts.firstOrNull() ?: this
-    val mac = try {
-        parts[1]
-    } catch (t: Throwable) {
-        null
-    }
-    return Pair(name, mac)
 }
 
 class PacketSender(
@@ -279,14 +288,14 @@ class PacketSender(
         ms.send(packet)
     } catch (t: Throwable) {
         cancel()
-        println(t.localizedMessage)
+        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
     }
 
 }
 
 fun checkDevices(state: LanSpyDesktopWindowState) {
     state.resultList.forEach { (key, device) ->
-        println("INFO: checking... device: $key, lastTime: ${formatter.format(device.lastTime)}")
+        LogLevel.DEBUG.log("${R.checking}: ${R.device}: $key; ${R.lastTime}: ${formatter.format(device.lastTime)}")
         when (Instant.now().minusMillis(device.lastTime.toEpochMilli()).toEpochMilli()) {
             in 1..10000 -> state.setStatus(key, DeviceStatus.VISIBLE)
             in 10001..25000 -> state.setStatus(key, DeviceStatus.INVISIBLE)
