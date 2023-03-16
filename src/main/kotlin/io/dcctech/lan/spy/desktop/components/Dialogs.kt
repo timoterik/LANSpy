@@ -1,12 +1,13 @@
 /*
- * Copyright © 2022-2023, DCCTech, Hungary and contributors. Use of this source code is governed by the Apache 2.0 license.
+ * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
  */
 
-package io.dcctech.lan.spy.desktop.util
+package io.dcctech.lan.spy.desktop.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.ui.window.FrameWindowScope
+import io.dcctech.lan.spy.desktop.data.AlertDialogResult
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -14,9 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.swing.Swing
 import javax.swing.JOptionPane
 
-enum class AlertDialogResult {
-    Yes, No, Cancel
-}
 
 @OptIn(DelicateCoroutinesApi::class)
 @Composable
