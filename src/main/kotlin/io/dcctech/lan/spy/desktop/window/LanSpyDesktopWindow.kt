@@ -18,13 +18,13 @@ import io.dcctech.lan.spy.desktop.common.ResName
 import io.dcctech.lan.spy.desktop.components.DialogBox
 import io.dcctech.lan.spy.desktop.components.Logo
 import io.dcctech.lan.spy.desktop.components.ResultList
-import io.dcctech.lan.spy.desktop.getAppTitleFromState
+import io.dcctech.lan.spy.desktop.utils.getAppTitleFromState
+import io.dcctech.lan.spy.desktop.utils.getWifiInformation
 import kotlinx.coroutines.launch
 
 @Composable
 fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
     val scope = rememberCoroutineScope()
-
     fun exit() = scope.launch { state.exit() }
 
     Window(
@@ -68,16 +68,17 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
                 }
             )
         }
-        if (state.preferencesDialog.isAwaiting) {
+        if (state.wifiDialog.isAwaiting) {
             DialogBox(
-                title = R.preferencesDialogTitle,
-                message = R.preferencesDialogMsg,
+                title = R.wifiDialog,
+                message = getWifiInformation(),
                 onResult = {
-                    state.preferencesDialog.onResult(it)
+                    state.wifiDialog.onResult(it)
                 },
                 withoutDialogue = true
             )
         }
+
     }
 }
 

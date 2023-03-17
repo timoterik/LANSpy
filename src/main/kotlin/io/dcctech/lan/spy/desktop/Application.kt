@@ -32,6 +32,7 @@ fun ApplicationScope.DesktopApplication(state: DesktopApplicationState) {
 
 @Composable
 private fun ApplicationScope.ApplicationTray(state: DesktopApplicationState) {
+
     Tray(
         icon = LocalAppResources.current.res[ResName.DCCTECH_LOGO]
             ?: painterResource("/Color-dcctech-no-bg.png"),
@@ -43,6 +44,7 @@ private fun ApplicationScope.ApplicationTray(state: DesktopApplicationState) {
 
 @Composable
 private fun MenuScope.ApplicationMenu(state: DesktopApplicationState) {
+
     val scope = rememberCoroutineScope()
     fun exit() = scope.launch { state.exit() }
 

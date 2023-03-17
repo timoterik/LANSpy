@@ -36,7 +36,7 @@ object R {
     val helpDialogTitle: String
     val helpDialogMsg: String
     val preferencesDialogTitle: String
-    val preferencesDialogMsg: String
+    val wifiDialog: String
     val file: String
     val newWindow: String
     val exit: String
@@ -52,6 +52,7 @@ object R {
     val light: String
     val dark: String
     val help: String
+    val infoWifi: String
 
     init {
         if (System.getProperty("user.language").equals("hu")) {
@@ -86,7 +87,7 @@ object R {
             helpDialogTitle = "Súgó ablak"
             helpDialogMsg = "Ez hasznos volt?"
             preferencesDialogTitle = "Beállítások"
-            preferencesDialogMsg = "Ez a párbeszédpanel a beállítások értékeiről szól."
+            wifiDialog = "Wifi hálozati információk"
             file = "Fájl"
             newWindow = "Új ablak"
             exit = "Kilépés"
@@ -102,13 +103,13 @@ object R {
             light = "Világos"
             dark = "Sötét"
             help = "Súgó"
-
+            infoWifi = "Wifi info"
 
         } else {
             appName = "Lan Spy App"
             deviceDiscovery = "Device discovery"
-            running = "The application is running"
-            stopped = "The application has stopped"
+            running = "is running"
+            stopped = "has stopped"
             path = "path"
             cannotOpenThisPath = "Cannot open this path"
             successfulAssistance = "We're glad we were able to helped!"
@@ -136,7 +137,7 @@ object R {
             helpDialogTitle = "Help"
             helpDialogMsg = "Was this helpful?"
             preferencesDialogTitle = "Preferences"
-            preferencesDialogMsg = "This dialog box is about the settings values."
+            wifiDialog = "Information about the WIFI network."
             file = "File"
             newWindow = "New window"
             exit = "Exit"
@@ -152,6 +153,7 @@ object R {
             light = "Light"
             dark = "Dark"
             help = "Help"
+            infoWifi = "Wifi info"
         }
     }
 }

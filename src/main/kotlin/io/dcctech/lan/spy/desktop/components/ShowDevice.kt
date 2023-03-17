@@ -15,8 +15,8 @@ import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.data.Device
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.getDeviceColorByStatus
-import io.dcctech.lan.spy.desktop.log
+import io.dcctech.lan.spy.desktop.utils.getDeviceColorByStatus
+import io.dcctech.lan.spy.desktop.utils.log
 import java.awt.Desktop
 import java.net.URI
 

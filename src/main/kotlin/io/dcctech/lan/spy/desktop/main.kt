@@ -4,13 +4,19 @@
 
 package io.dcctech.lan.spy.desktop
 
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.window.application
 import io.dcctech.lan.spy.desktop.common.LocalAppResources
 import io.dcctech.lan.spy.desktop.common.rememberAppResources
 
 fun main() = application {
-    CompositionLocalProvider(LocalAppResources provides rememberAppResources()) {
-        DesktopApplication(rememberApplicationState())
+    MaterialTheme(
+        colors = darkColors()
+    ) {
+        CompositionLocalProvider(LocalAppResources provides rememberAppResources()) {
+            DesktopApplication(rememberApplicationState())
+        }
     }
 }

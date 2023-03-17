@@ -10,7 +10,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.log
+import io.dcctech.lan.spy.desktop.utils.log
 
 val LocalAppResources = staticCompositionLocalOf<AppResources> {
     LogLevel.CRITICAL.log(R.notProvided)

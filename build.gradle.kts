@@ -43,6 +43,8 @@ compose.desktop {
             nativeDistributions {
                 targetFormats(TargetFormat.Exe, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Deb)
                 macOS {
+                    dockName = "LANSpy"
+                    setDockNameSameAsPackageName = false
                     iconFile.set(project.file("src/main/resources/Color-dcctech-no-bg.icns"))
                 }
                 windows {

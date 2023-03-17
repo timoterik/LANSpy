@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.data.Device
-import io.dcctech.lan.spy.desktop.formatter
+import io.dcctech.lan.spy.desktop.utils.formatter
 
 @Composable
 fun DeviceCard(

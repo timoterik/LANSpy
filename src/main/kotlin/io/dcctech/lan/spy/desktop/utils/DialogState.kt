@@ -2,27 +2,24 @@
  * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
  */
 
-package io.dcctech.lan.spy.desktop.common
+package io.dcctech.lan.spy.desktop.utils
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import io.dcctech.lan.spy.desktop.common.theme.DarkColors
+import kotlinx.coroutines.CompletableDeferred
 
-class Settings {
-    var inetAddress by mutableStateOf("228.5.6.7")
-        private set
-    var port by mutableStateOf(5000)
-        private set
+class DialogState<T> {
+    private var onResult: CompletableDeferred<T>? by mutableStateOf(null)
 
-    var delayedCheck by mutableStateOf(5000L)
-        private set
+    val isAwaiting get() = onResult != null
 
-    var sendingPeriod by mutableStateOf(2000L)
-        private set
+    suspend fun awaitResult(): T {
+        onResult = CompletableDeferred()
+        val result = onResult!!.await()
+        onResult = null
+        return result
+    }
 
-    var isTrayEnabled by mutableStateOf(true)
-        private set
-
-    var theme by mutableStateOf(DarkColors)
+    fun onResult(result: T) = onResult!!.complete(result)
 }
