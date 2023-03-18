@@ -12,7 +12,6 @@ import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.window.FrameWindowScope
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.WindowPlacement
-import androidx.compose.ui.window.rememberTrayState
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.common.theme.DarkColors
 import io.dcctech.lan.spy.desktop.common.theme.LightColors
@@ -24,7 +23,6 @@ import java.awt.event.KeyEvent
 @Composable
 fun FrameWindowScope.WindowMenuBar(state: LanSpyDesktopWindowState) = MenuBar {
     val scope = rememberCoroutineScope()
-    val trayState = rememberTrayState()
     fun exit() = scope.launch { state.exit() }
     fun openHelpDialog() = scope.launch { state.helpDialog() }
     fun openWifiDialog() = scope.launch { state.wifiDialog() }

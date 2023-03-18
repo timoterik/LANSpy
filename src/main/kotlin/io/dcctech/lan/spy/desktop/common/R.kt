@@ -53,6 +53,14 @@ object R {
     val dark: String
     val help: String
     val infoWifi: String
+    val displayName: String
+    val name: String
+    val index: String
+    val mtu: String
+    val hardwareAddress: String
+    val address: String
+    val networks: String
+    val devices: String
 
     init {
         if (System.getProperty("user.language").equals("hu")) {
@@ -104,6 +112,14 @@ object R {
             dark = "Sötét"
             help = "Súgó"
             infoWifi = "Wifi info"
+            displayName = "Megjelenítendő név"
+            name = "Név"
+            address = "Cím"
+            index = "Index"
+            mtu = "MTU"
+            hardwareAddress = "Hardvercím"
+            networks = "Hálózati információk"
+            devices = "Eszközök"
 
         } else {
             appName = "Lan Spy App"
@@ -154,6 +170,14 @@ object R {
             dark = "Dark"
             help = "Help"
             infoWifi = "Wifi info"
+            displayName = "Display name"
+            name = "Name"
+            address = "Address"
+            index = "Index"
+            mtu = "MTU"
+            hardwareAddress = "Hardware address"
+            networks = "Network information"
+            devices = "Devices"
         }
     }
 }

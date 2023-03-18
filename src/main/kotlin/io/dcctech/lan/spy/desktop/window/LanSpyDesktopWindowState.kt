@@ -13,14 +13,8 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import io.dcctech.lan.spy.desktop.DesktopApplicationState
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.AlertDialogResult
-import io.dcctech.lan.spy.desktop.data.Device
-import io.dcctech.lan.spy.desktop.data.DeviceStatus
-import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.utils.DialogState
-import io.dcctech.lan.spy.desktop.utils.checkDevices
-import io.dcctech.lan.spy.desktop.utils.discoveryOfServerModules
-import io.dcctech.lan.spy.desktop.utils.log
+import io.dcctech.lan.spy.desktop.data.*
+import io.dcctech.lan.spy.desktop.utils.*
 import kotlinx.coroutines.*
 import java.nio.file.Path
 
@@ -31,6 +25,7 @@ class LanSpyDesktopWindowState(
 ) {
     val window = WindowState()
     var resultList: MutableMap<String, Device> = mutableStateMapOf()
+    var networkList: List<NetworkInfo> = getNetworkInformation()
     val exitDialog = DialogState<AlertDialogResult>()
     val helpDialog = DialogState<AlertDialogResult>()
     val wifiDialog = DialogState<AlertDialogResult>()
@@ -104,6 +99,7 @@ class LanSpyDesktopWindowState(
             }
         }
     }
+
 
     fun setProcessState(status: String) {
         process = status

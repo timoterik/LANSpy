@@ -4,22 +4,18 @@
 
 package io.dcctech.lan.spy.desktop.window
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import io.dcctech.lan.spy.desktop.common.LocalAppResources
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.common.ResName
 import io.dcctech.lan.spy.desktop.components.DialogBox
-import io.dcctech.lan.spy.desktop.components.Logo
-import io.dcctech.lan.spy.desktop.components.ResultList
+import io.dcctech.lan.spy.desktop.ui.TwoColumnsLayout
+import io.dcctech.lan.spy.desktop.utils.getAllNetworkInformation
 import io.dcctech.lan.spy.desktop.utils.getAppTitleFromState
-import io.dcctech.lan.spy.desktop.utils.getWifiInformation
+import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
 import kotlinx.coroutines.launch
 
 @Composable
@@ -35,20 +31,21 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
     ) {
         LaunchedEffect(Unit) { state.run() }
 
+        scope.launch { getAllNetworkInformation(state) }
+
+
         WindowMenuBar(state)
 
-        Row {
-            Column(
-                Modifier.fillMaxHeight(0.75F).padding(30.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ResultList(state.resultList.map { it.value }.toList())
-            }
-        }
-        Row {
-            Logo()
-        }
+        TwoColumnsLayout(state)
+//
+//        Row {
+//
+//            NetworkList(state.networkList)
+//            ResultList(state.resultList.map { it.value }.toList())
+//        }
+//        Row {
+//            Logo()
+//        }
 
         if (state.exitDialog.isAwaiting) {
             DialogBox(
@@ -71,7 +68,7 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
         if (state.wifiDialog.isAwaiting) {
             DialogBox(
                 title = R.wifiDialog,
-                message = getWifiInformation(),
+                message = getNetworkInformation().map { it.toString() }.joinToString { "\n" },
                 onResult = {
                     state.wifiDialog.onResult(it)
                 },

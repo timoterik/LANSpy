@@ -3,13 +3,21 @@
  */
 package io.dcctech.lan.spy.desktop.utils
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.data.Device
 import io.dcctech.lan.spy.desktop.data.DeviceStatus
 import io.dcctech.lan.spy.desktop.data.LogLevel
+import io.dcctech.lan.spy.desktop.data.NetworkInfo
 import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.DatagramPacket
 import java.net.InetAddress
@@ -45,7 +53,6 @@ fun String.getNameAndMac(): Pair<String, String?> {
 }
 
 fun LogLevel.log(msg: String) {
-
     println("$this: $msg")
 }
 
@@ -57,19 +64,23 @@ fun getDeviceColorByStatus(device: Device): Color {
     }
 }
 
-fun getWifiInformation(): String {
+fun getNetworkInformation(): List<NetworkInfo> {
+    val resultList = mutableListOf<NetworkInfo>()
     val interfaces = NetworkInterface.getNetworkInterfaces()
     for (intf in interfaces) {
-        if (intf.name.contains("wlan")) {
-            val addresses = intf.inetAddresses
-            for (addr in addresses) {
-                if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
-                    return "Interface name: ${intf.displayName}\nIP address: ${addr.hostAddress}"
-                }
-            }
+        val listOfAddress = mutableListOf<String>()
+        val addresses = intf.inetAddresses
+        for (addr in addresses) {
+            listOfAddress.add(addr.hostAddress)
         }
+        val wifiInfo = NetworkInfo(
+            name = intf.name, displayName = intf.displayName, index = "${intf.index}",
+            hardwareAddress = intf.hardwareAddress?.contentToString(), mtu = intf.mtu, address = listOfAddress
+        )
+        LogLevel.DEBUG.log(wifiInfo.toString())
+        resultList.add(wifiInfo)
     }
-    return "No WiFi interface found"
+    return resultList
 }
 
 
@@ -111,6 +122,18 @@ fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
     }
 }
 
+suspend fun getAllNetworkInformation(state: LanSpyDesktopWindowState) {
+    while (true) {
+        try {
+            state.scope.launch(Dispatchers.IO) {
+                state.networkList.plus(getNetworkInformation()).distinct()
+            }
+            delay(10000)
+        } catch (t: Throwable) {
+            LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
+        }
+    }
+}
 
 
 fun checkDevices(state: LanSpyDesktopWindowState) {
@@ -128,3 +151,8 @@ fun checkDevices(state: LanSpyDesktopWindowState) {
 fun showNotification(title: String, message: String) {
     JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE)
 }
+
+fun List<String>.concat() = this.joinToString(",\n") { it }
+
+@Composable
+fun title(title: String) = Text(textAlign = TextAlign.Center, text = title, modifier = Modifier.padding(5.dp))
