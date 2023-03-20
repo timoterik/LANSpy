@@ -11,22 +11,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.Device
-import io.dcctech.lan.spy.desktop.data.DeviceStatus
+import io.dcctech.lan.spy.desktop.data.Client
 import io.dcctech.lan.spy.desktop.data.LogLevel
 import io.dcctech.lan.spy.desktop.data.NetworkInfo
+import io.dcctech.lan.spy.desktop.data.Status
 import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.net.DatagramPacket
-import java.net.InetAddress
-import java.net.MulticastSocket
 import java.net.NetworkInterface
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.util.*
 import javax.swing.JOptionPane
 
 
@@ -40,119 +33,83 @@ var formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm
     .withZone(ZoneId.systemDefault())
 
 
-fun String.getNameAndMac(): Pair<String, String?> {
-
-    val parts = this.split("\n")
-    val name = parts.firstOrNull() ?: this
-    val mac = try {
-        parts[1]
-    } catch (t: Throwable) {
-        null
-    }
-    return Pair(name, mac)
-}
-
 fun LogLevel.log(msg: String) {
     println("$this: $msg")
 }
 
-fun getDeviceColorByStatus(device: Device): Color {
-    return when (device.status) {
-        DeviceStatus.VISIBLE -> Color.Green
-        DeviceStatus.INVISIBLE -> Color.Yellow
-        DeviceStatus.GONE -> Color.LightGray
+fun getDeviceColorByStatus(client: Client): Color {
+    return when (client.status) {
+        Status.VISIBLE -> Color.Green
+        Status.INVISIBLE -> Color.Yellow
+        Status.GONE -> Color.LightGray
     }
 }
 
-fun getNetworkInformation(): List<NetworkInfo> {
-    val resultList = mutableListOf<NetworkInfo>()
-    val interfaces = NetworkInterface.getNetworkInterfaces()
-    for (intf in interfaces) {
-        val listOfAddress = mutableListOf<String>()
-        val addresses = intf.inetAddresses
-        for (addr in addresses) {
-            listOfAddress.add(addr.hostAddress)
-        }
-        val wifiInfo = NetworkInfo(
-            name = intf.name, displayName = intf.displayName, index = "${intf.index}",
-            hardwareAddress = intf.hardwareAddress?.contentToString(), mtu = intf.mtu, address = listOfAddress
-        )
-        LogLevel.DEBUG.log(wifiInfo.toString())
-        resultList.add(wifiInfo)
-    }
-    return resultList
-}
-
-
-fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
-    val port = state.application.settings.port
-    val timer = Timer()
-    val bytesToSend = "discovering".toByteArray()
-    val group: InetAddress = InetAddress.getByName(state.application.settings.inetAddress)
+fun getNetworkInformation(state: LanSpyDesktopWindowState) {
 
     try {
-        state.scope.launch(Dispatchers.IO) {
-            MulticastSocket(port).use { ms ->
-                ms.joinGroup(group)
-                val buffer = ByteArray(1024)
-                val packetToReceive = DatagramPacket(buffer, buffer.size)
-                timer.schedule(
-                    PacketSender(ms, bytesToSend, group, port), 0, state.application.settings.sendingPeriod
-                )
-                while (state.isRunning) {
-                    LogLevel.DEBUG.log(R.listening)
-                    ms.receive(packetToReceive)
-                    val nameAndMac = String(buffer, 0, packetToReceive.length).getNameAndMac()
-                    val device = Device(
-                        status = DeviceStatus.VISIBLE,
-                        name = nameAndMac.first,
-                        address = "${packetToReceive.address}:${packetToReceive.port}",
-                        mac = nameAndMac.second ?: "",
+        val interfaces = NetworkInterface.getNetworkInterfaces()
+
+        for (intf in interfaces) {
+            val addresses = intf.inetAddresses
+            for (addr in addresses) {
+                if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
+                    val client = Client(
+                        status = Status.VISIBLE,
+                        name = addr.hostName,
+                        interfaceName = intf.displayName,
+                        address = addr.hostAddress,
+                        mac = addr.address.getMac(),
                         lastTime = Instant.now()
                     )
 
-                    state.addDeviceToResult(device)
+                    state.addDeviceToResult(client)
+
+                    LogLevel.DEBUG.log(client.toString())
+                } else {
+                    val networkInfo = NetworkInfo(
+                        displayName = intf.displayName,
+                        index = "${intf.index}",
+                        hardwareAddress = intf.hardwareAddress.getMac(),
+                        mtu = intf.mtu,
+                        address = intf.inetAddresses().toString(),
+                        lastTime = Instant.now(),
+                        status = Status.VISIBLE,
+                        name = intf.name,
+                        mac = intf.hardwareAddress.getMac()
+
+                    )
+                    state.addNetwork(networkInfo)
+                    LogLevel.DEBUG.log(networkInfo.toString())
+
                 }
-//                ms.leaveGroup(SocketAddress, NetworkInterface)
-                ms.leaveGroup(group)
             }
         }
     } catch (t: Throwable) {
         LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
     }
+
 }
 
-suspend fun getAllNetworkInformation(state: LanSpyDesktopWindowState) {
-    while (true) {
-        try {
-            state.scope.launch(Dispatchers.IO) {
-                state.networkList.plus(getNetworkInformation()).distinct()
-            }
-            delay(10000)
-        } catch (t: Throwable) {
-            LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
-        }
+/**
+ * Extract each array of mac address and convert it to hexadecimal with the following format: 08-00-27-DC-4A-9E.
+ * */
+fun ByteArray?.getMac(): String {
+    if (this == null) return R.unknown
+
+    var macAddress = ""
+
+    for (i in this.indices) {
+        macAddress += java.lang.String.format("%02X%s", this[i], if (i < this.size - 1) "-" else "")
     }
+
+    return macAddress
 }
 
-
-fun checkDevices(state: LanSpyDesktopWindowState) {
-    state.resultList.forEach { (key, device) ->
-        LogLevel.DEBUG.log("${R.checking}: ${R.device}: $key; ${R.lastTime}: ${formatter.format(device.lastTime)}")
-        when (Instant.now().minusMillis(device.lastTime.toEpochMilli()).toEpochMilli()) {
-            in 1..10000 -> state.setStatus(key, DeviceStatus.VISIBLE)
-            in 10001..25000 -> state.setStatus(key, DeviceStatus.INVISIBLE)
-            in 25001..40000 -> state.setStatus(key, DeviceStatus.GONE)
-            else -> state.removeDeviceFromList(key)
-        }
-    }
-}
 
 fun showNotification(title: String, message: String) {
     JOptionPane.showMessageDialog(null, message, title, JOptionPane.INFORMATION_MESSAGE)
 }
-
-fun List<String>.concat() = this.joinToString(",\n") { it }
 
 @Composable
 fun title(title: String) = Text(textAlign = TextAlign.Center, text = title, modifier = Modifier.padding(5.dp))

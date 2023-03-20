@@ -60,7 +60,10 @@ object R {
     val hardwareAddress: String
     val address: String
     val networks: String
+    val network: String
     val devices: String
+    val unknown: String
+    val interfaceName: String
 
     init {
         if (System.getProperty("user.language").equals("hu")) {
@@ -75,7 +78,7 @@ object R {
                 "Sajnálattal halljuk, hogy nem elégedett a segítségnyújtási szolgáltatásunkkal!"
             hasBeenFinished = "Be lett fejezve."
             update = "Frissítés"
-            statusHasChanged = "A key-val rendelkező eszköz állapota oldStatus-ról newStatus-ra változott."
+            statusHasChanged = "A key -val rendelkező eszköz állapota oldStatus-ról newStatus-ra változott."
             removeDevice = "A (key) címmel rendelkező eszköz eltávolítva."
             listening = "Figyel..."
             checking = "Ellenőrzés..."
@@ -89,7 +92,7 @@ object R {
             deviceStatus = "Eszköz állapota"
             deviceName = "Eszköz megnevezése"
             deviceAddress = "Eszköz címe"
-            deviceMac = "Eszköz MAC címe"
+            deviceMac = "MAC cím"
             discoverDevices = "Eszközök keresése"
             confirmationDialog = "Biztosan kiszeretne lépni?"
             helpDialogTitle = "Súgó ablak"
@@ -120,6 +123,9 @@ object R {
             hardwareAddress = "Hardvercím"
             networks = "Hálózati információk"
             devices = "Eszközök"
+            unknown = "Ismeretlen"
+            interfaceName = "Ismeretlen"
+            network = "Hálozat"
 
         } else {
             appName = "Lan Spy App"
@@ -147,7 +153,7 @@ object R {
             deviceStatus = "Device status"
             deviceName = "Device name"
             deviceAddress = "Device address"
-            deviceMac = "Device MAC address"
+            deviceMac = "MAC address"
             discoverDevices = "Discover devices"
             confirmationDialog = "Are you sure you want to exit?"
             helpDialogTitle = "Help"
@@ -178,6 +184,9 @@ object R {
             hardwareAddress = "Hardware address"
             networks = "Network information"
             devices = "Devices"
+            unknown = "Unknown"
+            interfaceName = "Interface name"
+            network = "Network"
         }
     }
 }

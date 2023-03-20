@@ -17,11 +17,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.dcctech.lan.spy.desktop.data.Device
+import io.dcctech.lan.spy.desktop.data.Client
 
 
 @Composable
-fun ResultList(list: List<Device>) {
+fun ResultList(list: List<Client>) {
     Box {
 
         val state = rememberLazyListState()

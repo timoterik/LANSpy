@@ -30,7 +30,7 @@ fun RightPaneContent(state: LanSpyDesktopWindowState) {
     ) {
         title(R.devices)
         Divider(thickness = 2.dp, color = Color.Red, modifier = Modifier.padding(5.dp))
-        ResultList(state.resultList.map { it.value })
+        ResultList(state.listOfClients.map { it.value })
 
     }
 }

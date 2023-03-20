@@ -13,9 +13,7 @@ import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.common.ResName
 import io.dcctech.lan.spy.desktop.components.DialogBox
 import io.dcctech.lan.spy.desktop.ui.TwoColumnsLayout
-import io.dcctech.lan.spy.desktop.utils.getAllNetworkInformation
 import io.dcctech.lan.spy.desktop.utils.getAppTitleFromState
-import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
 import kotlinx.coroutines.launch
 
 @Composable
@@ -31,21 +29,9 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
     ) {
         LaunchedEffect(Unit) { state.run() }
 
-        scope.launch { getAllNetworkInformation(state) }
-
-
         WindowMenuBar(state)
 
         TwoColumnsLayout(state)
-//
-//        Row {
-//
-//            NetworkList(state.networkList)
-//            ResultList(state.resultList.map { it.value }.toList())
-//        }
-//        Row {
-//            Logo()
-//        }
 
         if (state.exitDialog.isAwaiting) {
             DialogBox(
@@ -68,7 +54,7 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
         if (state.wifiDialog.isAwaiting) {
             DialogBox(
                 title = R.wifiDialog,
-                message = getNetworkInformation().map { it.toString() }.joinToString { "\n" },
+                message = state.networkList.map { it.toString() }.joinToString { "\n" },
                 onResult = {
                     state.wifiDialog.onResult(it)
                 },

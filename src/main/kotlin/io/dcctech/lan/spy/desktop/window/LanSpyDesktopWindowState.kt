@@ -13,8 +13,14 @@ import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import io.dcctech.lan.spy.desktop.DesktopApplicationState
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.*
-import io.dcctech.lan.spy.desktop.utils.*
+import io.dcctech.lan.spy.desktop.data.AlertDialogResult
+import io.dcctech.lan.spy.desktop.data.Client
+import io.dcctech.lan.spy.desktop.data.LogLevel
+import io.dcctech.lan.spy.desktop.data.NetworkInfo
+import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.checkEntity
+import io.dcctech.lan.spy.desktop.utils.DialogState
+import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
+import io.dcctech.lan.spy.desktop.utils.log
 import kotlinx.coroutines.*
 import java.nio.file.Path
 
@@ -24,8 +30,8 @@ class LanSpyDesktopWindowState(
     private val exit: (LanSpyDesktopWindowState) -> Unit
 ) {
     val window = WindowState()
-    var resultList: MutableMap<String, Device> = mutableStateMapOf()
-    var networkList: List<NetworkInfo> = getNetworkInformation()
+    var listOfClients: MutableMap<String, Client> = mutableStateMapOf()
+    var networkList: MutableMap<String, NetworkInfo> = mutableStateMapOf()
     val exitDialog = DialogState<AlertDialogResult>()
     val helpDialog = DialogState<AlertDialogResult>()
     val wifiDialog = DialogState<AlertDialogResult>()
@@ -63,8 +69,8 @@ class LanSpyDesktopWindowState(
 
     fun start() {
         isRunning = true
-        discoveryOfServerModules(state = this)
         setProcessState(R.running)
+        getNetworkInformation(this)
     }
 
     fun stop() {
@@ -75,7 +81,8 @@ class LanSpyDesktopWindowState(
 
     fun reset() {
         isRunning = false
-        resultList = mutableMapOf()
+        listOfClients = mutableMapOf()
+        networkList = mutableMapOf()
         setProcessState("")
     }
 
@@ -93,7 +100,9 @@ class LanSpyDesktopWindowState(
         while (scope.isActive) {
             try {
                 delay(application.settings.delayedCheck)
-                checkDevices(this)
+                getNetworkInformation(this)
+                listOfClients.plus(checkEntity(listOfClients))
+                networkList.plus(checkEntity(networkList))
             } catch (t: Throwable) {
                 LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
@@ -101,15 +110,14 @@ class LanSpyDesktopWindowState(
     }
 
 
+
     fun setProcessState(status: String) {
         process = status
     }
 
     fun createNotification(title: String, msg: String, type: Notification.Type = Notification.Type.Info) {
-        println("create")
         application.tray.sendNotification(Notification(title = title, message = msg, type = type))
         notification = Notification(title = title, message = msg, type = type)
-        println("this a noti: $notification")
     }
 
     private fun open(path: Path) {
@@ -168,31 +176,16 @@ class LanSpyDesktopWindowState(
         }
     }
 
-    fun addDeviceToResult(device: Device) {
-        resultList[device.address] = device
+    fun addDeviceToResult(client: Client) {
+        listOfClients[client.address] = client
     }
 
-    fun setStatus(key: String, newStatus: DeviceStatus) {
-        var oldStatus: DeviceStatus? = null
-        resultList[key]?.let {
-            oldStatus = it.status
-            it.status = newStatus
-            val msg = "${R.update}: ${R.statusHasChanged}"
-                .replace("key", key)
-                .replace("oldStatus", "$oldStatus")
-                .replace("newStatus", "$newStatus")
-
-            LogLevel.INFO.log(msg)
-        }
-    }
-
-    fun removeDeviceFromList(key: String) {
-        resultList.remove(key)
-        LogLevel.INFO.log(R.removeDevice.replace("key", key))
+    fun addNetwork(networkInfo: NetworkInfo) {
+        networkList[networkInfo.displayName] = networkInfo
     }
 
     private suspend fun areYouSure(): Boolean {
-        return if (isRunning || resultList.isNotEmpty()) {
+        return if (isRunning || listOfClients.isNotEmpty()) {
             when (exitDialog.awaitResult()) {
                 AlertDialogResult.Yes -> {
                     true

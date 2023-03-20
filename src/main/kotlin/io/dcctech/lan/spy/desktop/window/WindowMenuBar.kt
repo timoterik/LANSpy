@@ -26,6 +26,7 @@ fun FrameWindowScope.WindowMenuBar(state: LanSpyDesktopWindowState) = MenuBar {
     fun exit() = scope.launch { state.exit() }
     fun openHelpDialog() = scope.launch { state.helpDialog() }
     fun openWifiDialog() = scope.launch { state.wifiDialog() }
+
     Menu(R.file) {
         Item(R.newWindow, onClick = state::newWindow)
         Separator()
@@ -34,7 +35,7 @@ fun FrameWindowScope.WindowMenuBar(state: LanSpyDesktopWindowState) = MenuBar {
     Menu(R.actions, mnemonic = 'A') {
         if (!state.isRunning) Item(R.startSearch, onClick = state::start)
         if (state.isRunning) Item(R.stopSearch, onClick = state::stop)
-        if (state.resultList.isNotEmpty()) Item(R.reset, onClick = state::reset)
+        if (state.listOfClients.isNotEmpty()) Item(R.reset, onClick = state::reset)
     }
     Menu(R.preferences, mnemonic = 'P') {
         Item(
@@ -49,7 +50,7 @@ fun FrameWindowScope.WindowMenuBar(state: LanSpyDesktopWindowState) = MenuBar {
             R.reset,
             mnemonic = 'R',
             shortcut = KeyShortcut(Key.R, ctrl = true),
-            onClick = { showNotification(R.reset, "Nothing") }
+            onClick = { showNotification(R.reset, R.reset) }
         )
 
         Menu(R.theme) {

@@ -4,19 +4,27 @@
 
 package io.dcctech.lan.spy.desktop.data
 
+import io.dcctech.lan.spy.desktop.common.R
+import java.time.Instant
+
 
 data class NetworkInfo(
 
-    var name: String,
+
     var displayName: String,
     val index: String,
     val hardwareAddress: String?,
-    val address: List<String> = emptyList(),
     val mtu: Int,
+    override val address: String,
+    override val lastTime: Instant,
+    override var status: Status,
+    override val name: String,
+    override val mac: String
 
-    ) {
+) : Ssdp(status, name, address, mac, lastTime) {
+
     override fun toString(): String {
-        return "Network: name=$name; display name=$displayName; index=$index, " +
-                "hardware address:${hardwareAddress ?: "---"}; MTU=$mtu; addresses: [${address.joinToString { "$it," }}]"
+        return "Network: display name=$displayName; index=$index, " +
+                "hardware address:${hardwareAddress ?: R.unknown}; MTU=$mtu; addresses: [${address}]"
     }
 }

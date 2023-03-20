@@ -4,6 +4,20 @@
 
 package io.dcctech.lan.spy.desktop.data
 
-enum class DeviceStatus {
-    VISIBLE, INVISIBLE, GONE
+import java.time.Instant
+
+
+data class Client(
+
+    var interfaceName: String,
+    override val name: String,
+    override val address: String,
+    override val mac: String,
+    override val lastTime: Instant,
+    override var status: Status
+
+) : Ssdp(status, name, address, mac, lastTime) {
+    override fun toString(): String {
+        return "Client: display name=$name; mac=$mac, interface name:${interfaceName}; addresses: [${address}]"
+    }
 }

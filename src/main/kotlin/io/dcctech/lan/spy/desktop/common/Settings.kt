@@ -10,15 +10,18 @@ import androidx.compose.runtime.setValue
 import io.dcctech.lan.spy.desktop.common.theme.DarkColors
 
 class Settings {
-    var inetAddress by mutableStateOf("228.5.6.7")
+    var inetAddress by mutableStateOf("224.0.0.3")
         private set
     var port by mutableStateOf(5000)
+        private set
+
+    var searchNetworkInfoDelay by mutableStateOf(1000L)
         private set
 
     var delayedCheck by mutableStateOf(5000L)
         private set
 
-    var sendingPeriod by mutableStateOf(2000L)
+    var timeout by mutableStateOf(1000)
         private set
 
     var isTrayEnabled by mutableStateOf(true)

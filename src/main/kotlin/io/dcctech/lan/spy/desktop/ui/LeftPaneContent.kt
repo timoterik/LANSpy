@@ -28,6 +28,6 @@ fun LeftPaneContent(state: LanSpyDesktopWindowState) {
     ) {
         title(R.networks)
         Divider(thickness = 2.dp, color = Color.Red, modifier = Modifier.padding(5.dp))
-        NetworkList(state.networkList)
+        NetworkList(state.networkList.map { it.value })
     }
 }

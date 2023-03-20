@@ -16,12 +16,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun KeyNValueInRow(modifier: Modifier = Modifier, key: String, value: String) {
-    Row(modifier.padding(5.dp)) {
+    Row(modifier.padding(2.dp)) {
         Column(modifier.fillMaxWidth(0.5f)) {
-            Text("$key:", modifier = modifier.padding(3.dp), fontWeight = FontWeight.Bold)
+            Text("$key:", fontWeight = FontWeight.Bold)
         }
         Column(modifier.fillMaxWidth(0.5f)) {
-            Text(value, modifier = modifier.padding(3.dp))
+            Text(value)
         }
     }
 }
