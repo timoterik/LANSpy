@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.Device
-import io.dcctech.lan.spy.desktop.formatter
+import io.dcctech.lan.spy.desktop.data.Client
+import io.dcctech.lan.spy.desktop.utils.formatter
 
 @Composable
 fun DeviceCard(
-    device: Device,
+    client: Client,
     onClick: () -> Unit
 ) {
     Row(
@@ -25,10 +25,11 @@ fun DeviceCard(
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        CreateColumnWithText(key = R.deviceStatus, value = device.status.name)
-        CreateColumnWithText(key = R.deviceName, value = device.name)
-        CreateColumnWithText(key = R.deviceAddress, value = device.address)
-        CreateColumnWithText(key = R.deviceAddress, value = device.mac)
-        CreateColumnWithText(key = R.lastTime, value = formatter.format(device.lastTime))
+        CreateColumnWithText(key = R.deviceStatus, value = client.status.name)
+        CreateColumnWithText(key = R.deviceName, value = client.name)
+        CreateColumnWithText(key = R.interfaceName, value = client.interfaceName)
+        CreateColumnWithText(key = R.deviceAddress, value = client.address)
+        CreateColumnWithText(key = R.deviceMac, value = client.mac)
+        CreateColumnWithText(key = R.lastTime, value = formatter.format(client.lastTime))
     }
 }

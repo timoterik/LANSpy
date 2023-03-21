@@ -4,46 +4,49 @@
 
 package io.dcctech.lan.spy.desktop.window
 
-import androidx.compose.material.Colors
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
 import io.dcctech.lan.spy.desktop.DesktopApplicationState
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.common.Settings
-import io.dcctech.lan.spy.desktop.common.theme.DarkColors
 import io.dcctech.lan.spy.desktop.data.AlertDialogResult
-import io.dcctech.lan.spy.desktop.data.Device
-import io.dcctech.lan.spy.desktop.data.DeviceStatus
+import io.dcctech.lan.spy.desktop.data.Client
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.formatter
-import io.dcctech.lan.spy.desktop.getNameAndMac
-import io.dcctech.lan.spy.desktop.log
+import io.dcctech.lan.spy.desktop.data.NetworkService
+import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.checkEntity
+import io.dcctech.lan.spy.desktop.utils.DialogState
+import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
+import io.dcctech.lan.spy.desktop.utils.log
 import kotlinx.coroutines.*
-import java.net.DatagramPacket
-import java.net.InetAddress
-import java.net.MulticastSocket
 import java.nio.file.Path
-import java.time.Instant
-import java.util.*
 
+
+/**
+A class representing the window state of the LanSpy desktop application. This class contains the application state,
+a path to a file, and a callback function for handling window exits.
+@property application The state of the LanSpy desktop application.
+@property path The path to a file.
+@property exit The callback function for handling window exits.
+ */
 class LanSpyDesktopWindowState(
-    private val application: DesktopApplicationState,
+    val application: DesktopApplicationState,
     path: Path?,
     private val exit: (LanSpyDesktopWindowState) -> Unit
 ) {
-    val settings: Settings get() = application.settings
     val window = WindowState()
-    var resultList: MutableMap<String, Device> = mutableStateMapOf()
+    var listOfClients: MutableMap<String, Client> = mutableStateMapOf()
+    var networkList: MutableMap<String, NetworkService> = mutableStateMapOf()
     val exitDialog = DialogState<AlertDialogResult>()
     val helpDialog = DialogState<AlertDialogResult>()
-    val preferencesDialog = DialogState<AlertDialogResult>()
+    val wifiDialog = DialogState<AlertDialogResult>()
     private var isInit by mutableStateOf(false)
-
     val scope = CoroutineScope(Dispatchers.Default)
+
+    var notification: Notification? = null
 
     var process by mutableStateOf("")
         private set
@@ -51,19 +54,14 @@ class LanSpyDesktopWindowState(
     var path by mutableStateOf(path)
         private set
 
+    /**
+    A boolean flag indicating the current state of the discovery process.
+    If true, the process is currently running; if false, it is not.
+     */
     var isRunning by mutableStateOf(false)
         private set
 
     private var _text by mutableStateOf("")
-    private var _theme by mutableStateOf(DarkColors)
-
-    var theme: Colors
-        get() = _theme
-        set(value) {
-//            AppTheme(useDarkTheme = (value == DarkColors)) { LANSpyDesktopWindow(state = this) }
-            _theme = value
-        }
-
     var text: String
         get() = _text
         set(value) {
@@ -73,6 +71,9 @@ class LanSpyDesktopWindowState(
         }
 
 
+    /**
+    Toggles the fullscreen mode of the current window.
+     */
     fun toggleFullscreen() {
         window.placement = if (window.placement == WindowPlacement.Fullscreen) {
             WindowPlacement.Floating
@@ -81,20 +82,34 @@ class LanSpyDesktopWindowState(
         }
     }
 
+    /**
+    Starts the discovery process for devices or network services. This function sets the state variables isRunning
+    and setProcessState to indicate that the discovery process is currently running.
+     */
     fun start() {
         isRunning = true
-        discoveryOfServerModules(state = this)
         setProcessState(R.running)
+        getNetworkInformation(this)
     }
 
+    /**
+    Stops the discovery process for devices or network services. This function sets the state variables isRunning
+    and setProcessState to indicate that the discovery process is currently stopped.
+     */
     fun stop() {
         isRunning = false
         setProcessState(R.stopped)
     }
 
+    /**
+    Resets the state of the application by removing all devices and network services information from the state.
+    This function can be called when the user wants to start a fresh discovery process or when the current
+    discovery process has ended and the user wants to clear the existing data.
+     */
     fun reset() {
         isRunning = false
-        resultList = mutableMapOf()
+        listOfClients = mutableMapOf()
+        networkList = mutableMapOf()
         setProcessState("")
     }
 
@@ -108,19 +123,37 @@ class LanSpyDesktopWindowState(
         checking()
     }
 
+    /**
+
+    This suspended function that checks the status of all devices or network services in the current state.
+    If necessary, it updates the status of each entity in the state based on the last time it was seen.
+    This function can be called periodically to ensure that the status of all entities is up-to-date.
+     */
     suspend fun checking() {
         while (scope.isActive) {
             try {
-                delay(5000)
-                checkDevices(this)
+                delay(application.settings.delayedCheck)
+                getNetworkInformation(this)
+                listOfClients.plus(checkEntity(listOfClients))
+                networkList.plus(checkEntity(networkList))
             } catch (t: Throwable) {
                 LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
         }
     }
 
+
+    /**
+    Sets the current state of the discovery process.
+    @param status A string representation of the current process state.
+     */
     fun setProcessState(status: String) {
         process = status
+    }
+
+    fun createNotification(title: String, msg: String, type: Notification.Type = Notification.Type.Info) {
+        application.tray.sendNotification(Notification(title = title, message = msg, type = type))
+        notification = Notification(title = title, message = msg, type = type)
     }
 
     private fun open(path: Path) {
@@ -129,10 +162,9 @@ class LanSpyDesktopWindowState(
         try {
             isInit = true
         } catch (e: Exception) {
-            e.printStackTrace()
             val msg = "${R.cannotOpenThisPath}: $path"
-            LogLevel.ERROR.log("$msg \n ${e.printStackTrace()}")
             text = msg
+            LogLevel.ERROR.log("$msg \n ${e.printStackTrace()}")
         }
     }
 
@@ -160,8 +192,8 @@ class LanSpyDesktopWindowState(
         }
     }
 
-    suspend fun preferencesDialog() {
-        when (preferencesDialog.awaitResult()) {
+    suspend fun wifiDialog() {
+        when (wifiDialog.awaitResult()) {
             AlertDialogResult.Yes -> {
                 LogLevel.INFO.log(R.hasBeenFinished)
             }
@@ -180,31 +212,16 @@ class LanSpyDesktopWindowState(
         }
     }
 
-    fun addDeviceToResult(device: Device) {
-        resultList[device.address] = device
+    fun addDeviceToResult(client: Client) {
+        listOfClients[client.address] = client
     }
 
-    fun setStatus(key: String, newStatus: DeviceStatus) {
-        var oldStatus: DeviceStatus? = null
-        resultList[key]?.let {
-            oldStatus = it.status
-            it.status = newStatus
-            val msg = "${R.update}: ${R.statusHasChanged}"
-                .replace("key", key)
-                .replace("oldStatus", "$oldStatus")
-                .replace("newStatus", "$newStatus")
-
-            LogLevel.INFO.log(msg)
-        }
-    }
-
-    fun removeDeviceFromList(key: String) {
-        resultList.remove(key)
-        LogLevel.INFO.log(R.removeDevice.replace("key", key))
+    fun addNetwork(networkService: NetworkService) {
+        networkList[networkService.displayName] = networkService
     }
 
     private suspend fun areYouSure(): Boolean {
-        return if (isRunning || resultList.isNotEmpty()) {
+        return if (isRunning || listOfClients.isNotEmpty()) {
             when (exitDialog.awaitResult()) {
                 AlertDialogResult.Yes -> {
                     true
@@ -221,86 +238,4 @@ class LanSpyDesktopWindowState(
         }
     }
 
-    class DialogState<T> {
-        private var onResult: CompletableDeferred<T>? by mutableStateOf(null)
-
-        val isAwaiting get() = onResult != null
-
-        suspend fun awaitResult(): T {
-            onResult = CompletableDeferred()
-            val result = onResult!!.await()
-            onResult = null
-            return result
-        }
-
-        fun onResult(result: T) = onResult!!.complete(result)
-    }
-}
-
-@OptIn(DelicateCoroutinesApi::class)
-private fun discoveryOfServerModules(state: LanSpyDesktopWindowState) {
-    val port = 5000  //FIXME state.settings.port
-    val timer = Timer()
-    val bytesToSend = "discovering".toByteArray()
-    val group: InetAddress = InetAddress.getByName("228.5.6.7")
-
-    try {
-        state.scope.launch(Dispatchers.IO) {
-            MulticastSocket(port).use { ms ->
-                ms.joinGroup(group)
-                val buffer = ByteArray(1024)
-                val packetToReceive = DatagramPacket(buffer, buffer.size)
-                timer.schedule(
-                    PacketSender(ms, bytesToSend, group, port), 0, 3000
-                ) //FIXME state.settings.sendingPeriod
-                while (state.isRunning) {
-                    LogLevel.DEBUG.log(R.listening)
-                    ms.receive(packetToReceive)
-                    val nameAndMac = String(buffer, 0, packetToReceive.length).getNameAndMac()
-                    val device = Device(
-                        status = DeviceStatus.VISIBLE,
-                        name = nameAndMac.first,
-                        address = "${packetToReceive.address}:${packetToReceive.port}",
-                        mac = nameAndMac.second ?: "",
-                        lastTime = Instant.now()
-                    )
-
-                    state.addDeviceToResult(device)
-                }
-                ms.leaveGroup(group)
-            }
-        }
-    } catch (t: Throwable) {
-        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
-    }
-}
-
-class PacketSender(
-    var ms: MulticastSocket,
-    var b: ByteArray,
-    group: InetAddress,
-    port: Int
-) : TimerTask() {
-
-    private val packet = DatagramPacket(b, b.size, group, port)
-
-    override fun run() = try {
-        ms.send(packet)
-    } catch (t: Throwable) {
-        cancel()
-        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
-    }
-
-}
-
-fun checkDevices(state: LanSpyDesktopWindowState) {
-    state.resultList.forEach { (key, device) ->
-        LogLevel.DEBUG.log("${R.checking}: ${R.device}: $key; ${R.lastTime}: ${formatter.format(device.lastTime)}")
-        when (Instant.now().minusMillis(device.lastTime.toEpochMilli()).toEpochMilli()) {
-            in 1..10000 -> state.setStatus(key, DeviceStatus.VISIBLE)
-            in 10001..25000 -> state.setStatus(key, DeviceStatus.INVISIBLE)
-            in 25001..40000 -> state.setStatus(key, DeviceStatus.GONE)
-            else -> state.removeDeviceFromList(key)
-        }
-    }
 }

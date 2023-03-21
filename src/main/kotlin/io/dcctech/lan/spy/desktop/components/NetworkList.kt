@@ -12,16 +12,17 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.dcctech.lan.spy.desktop.data.Client
+import io.dcctech.lan.spy.desktop.data.NetworkService
 
 
 @Composable
-fun ResultList(list: List<Client>) {
+fun NetworkList(list: List<NetworkService>) {
     Box {
 
         val state = rememberLazyListState()
@@ -35,8 +36,9 @@ fun ResultList(list: List<Client>) {
                     EmptyCard()
                 }
             } else {
-                items(list) { device ->
-                    ShowDevice(device)
+                items(list) { network ->
+                    NetworkCard(network)
+                    Divider(startIndent = 8.dp, thickness = 1.dp, color = Color.Black)
                     Spacer(modifier = Modifier.height(5.dp))
                 }
             }

@@ -4,11 +4,8 @@
 
 package io.dcctech.lan.spy.desktop.common.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
-import androidx.compose.runtime.Composable
 
 
 val LightColors = lightColors(
@@ -75,21 +72,3 @@ val DarkColors = darkColors(
 //    outlineVariant = md_theme_dark_outlineVariant,
 //    scrim = md_theme_dark_scrim,
 )
-
-@Composable
-fun AppTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
-) {
-    val theme = if (!useDarkTheme) {
-        LightColors
-    } else {
-        DarkColors
-    }
-
-    MaterialTheme {
-        theme
-        content
-    }
-
-}

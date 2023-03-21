@@ -4,27 +4,30 @@
 
 package io.dcctech.lan.spy.desktop.window
 
-import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import io.dcctech.lan.spy.desktop.common.LocalAppResources
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.common.ResName
 import io.dcctech.lan.spy.desktop.components.DialogBox
-import io.dcctech.lan.spy.desktop.components.Logo
-import io.dcctech.lan.spy.desktop.components.ResultList
-import io.dcctech.lan.spy.desktop.getAppTitleFromState
+import io.dcctech.lan.spy.desktop.ui.TwoColumnsLayout
+import io.dcctech.lan.spy.desktop.utils.getAppTitleFromState
 import kotlinx.coroutines.launch
 
+/**
+
+A Composable function that displays the main window of the LANSpy desktop application.
+@param state a LanSpyDesktopWindowState object which holds the current state of the application.
+@return A UI that consists of a title that displays the current status of the discovery process and additional buttons
+which are to modify the application state from the windows menu, a list of discovered network devices and services.
+@see Composable annotation which means it can be used within a Composable function or combined with other Composable
+functions to build a UI.
+ */
 @Composable
 fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
     val scope = rememberCoroutineScope()
-
     fun exit() = scope.launch { state.exit() }
 
     Window(
@@ -37,18 +40,7 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
 
         WindowMenuBar(state)
 
-        Row {
-            Column(
-                Modifier.fillMaxHeight(0.75F).padding(30.dp),
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ResultList(state.resultList.map { it.value }.toList())
-            }
-        }
-        Row {
-            Logo()
-        }
+        TwoColumnsLayout(state)
 
         if (state.exitDialog.isAwaiting) {
             DialogBox(
@@ -68,16 +60,17 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
                 }
             )
         }
-        if (state.preferencesDialog.isAwaiting) {
+        if (state.wifiDialog.isAwaiting) {
             DialogBox(
-                title = R.preferencesDialogTitle,
-                message = R.preferencesDialogMsg,
+                title = R.wifiDialog,
+                message = state.networkList.map { it.toString() }.joinToString { "\n" },
                 onResult = {
-                    state.preferencesDialog.onResult(it)
+                    state.wifiDialog.onResult(it)
                 },
                 withoutDialogue = true
             )
         }
+
     }
 }
 

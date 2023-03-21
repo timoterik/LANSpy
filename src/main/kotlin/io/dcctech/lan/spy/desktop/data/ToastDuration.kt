@@ -4,15 +4,6 @@
 
 package io.dcctech.lan.spy.desktop.data
 
-import java.time.Instant
-
-
-data class Device(
-
-    var status: DeviceStatus,
-    val name: String,
-    val address: String,
-    val mac: String,
-    val lastTime: Instant
-
-)
+enum class ToastDuration(val value: Int) {
+    SHORT(3000), MEDIUM(5000), LONG(10000)
+}

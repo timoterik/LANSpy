@@ -4,13 +4,24 @@
 
 package io.dcctech.lan.spy.desktop
 
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.darkColors
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.window.application
 import io.dcctech.lan.spy.desktop.common.LocalAppResources
 import io.dcctech.lan.spy.desktop.common.rememberAppResources
 
 fun main() = application {
-    CompositionLocalProvider(LocalAppResources provides rememberAppResources()) {
-        DesktopApplication(rememberApplicationState())
+    MaterialTheme(
+        colors = darkColors()
+    ) {
+        /*
+        * This code creates a CompositionLocalProvider composable that provides the LocalAppResources with
+        * the rememberAppResources() value. Then, it calls the DesktopApplication composable with
+        * the rememberApplicationState() value as a parameter,
+        * which creates a desktop application with its corresponding tray and windows.*/
+        CompositionLocalProvider(LocalAppResources provides rememberAppResources()) {
+            DesktopApplication(rememberApplicationState())
+        }
     }
 }

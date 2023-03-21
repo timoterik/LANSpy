@@ -13,23 +13,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.Device
+import io.dcctech.lan.spy.desktop.data.Client
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.getDeviceColorByStatus
-import io.dcctech.lan.spy.desktop.log
+import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.getColorByStatus
+import io.dcctech.lan.spy.desktop.utils.log
 import java.awt.Desktop
 import java.net.URI
 
 @Composable
-fun ShowDevice(device: Device) {
+fun ShowDevice(client: Client) {
     Box(
         modifier = Modifier.height(65.dp)
             .fillMaxWidth()
-            .background(color = getDeviceColorByStatus(device)),
+            .background(color = client.getColorByStatus()),
         contentAlignment = Alignment.CenterStart
     ) {
-        DeviceCard(device) {
-            val uri = URI.create("http:/${device.address}")
+        DeviceCard(client) {
+            val uri = URI.create("http:/${client.address}")
             try {
                 val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
                 if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
@@ -38,7 +38,6 @@ fun ShowDevice(device: Device) {
             } catch (e: Exception) {
                 val msg = R.couldNotOpenedInBrowser.replace("uri", "$uri")
                 LogLevel.ERROR.log("$msg\n${e.printStackTrace()}")
-                println()
             }
         }
     }

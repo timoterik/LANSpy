@@ -36,7 +36,7 @@ object R {
     val helpDialogTitle: String
     val helpDialogMsg: String
     val preferencesDialogTitle: String
-    val preferencesDialogMsg: String
+    val wifiDialog: String
     val file: String
     val newWindow: String
     val exit: String
@@ -52,6 +52,18 @@ object R {
     val light: String
     val dark: String
     val help: String
+    val infoWifi: String
+    val displayName: String
+    val name: String
+    val index: String
+    val mtu: String
+    val hardwareAddress: String
+    val address: String
+    val networks: String
+    val network: String
+    val devices: String
+    val unknown: String
+    val interfaceName: String
 
     init {
         if (System.getProperty("user.language").equals("hu")) {
@@ -66,7 +78,7 @@ object R {
                 "Sajnálattal halljuk, hogy nem elégedett a segítségnyújtási szolgáltatásunkkal!"
             hasBeenFinished = "Be lett fejezve."
             update = "Frissítés"
-            statusHasChanged = "A key-val rendelkező eszköz állapota oldStatus-ról newStatus-ra változott."
+            statusHasChanged = "A key -val rendelkező eszköz állapota oldStatus-ról newStatus-ra változott."
             removeDevice = "A (key) címmel rendelkező eszköz eltávolítva."
             listening = "Figyel..."
             checking = "Ellenőrzés..."
@@ -80,13 +92,13 @@ object R {
             deviceStatus = "Eszköz állapota"
             deviceName = "Eszköz megnevezése"
             deviceAddress = "Eszköz címe"
-            deviceMac = "Eszköz MAC címe"
+            deviceMac = "MAC cím"
             discoverDevices = "Eszközök keresése"
             confirmationDialog = "Biztosan kiszeretne lépni?"
             helpDialogTitle = "Súgó ablak"
             helpDialogMsg = "Ez hasznos volt?"
             preferencesDialogTitle = "Beállítások"
-            preferencesDialogMsg = "Ez a párbeszédpanel a beállítások értékeiről szól."
+            wifiDialog = "Wifi hálozati információk"
             file = "Fájl"
             newWindow = "Új ablak"
             exit = "Kilépés"
@@ -102,13 +114,24 @@ object R {
             light = "Világos"
             dark = "Sötét"
             help = "Súgó"
-
+            infoWifi = "Wifi info"
+            displayName = "Megjelenítendő név"
+            name = "Név"
+            address = "Cím"
+            index = "Index"
+            mtu = "MTU"
+            hardwareAddress = "Hardvercím"
+            networks = "Hálózati információk"
+            devices = "Eszközök"
+            unknown = "Ismeretlen"
+            interfaceName = "Ismeretlen"
+            network = "Hálozat"
 
         } else {
             appName = "Lan Spy App"
             deviceDiscovery = "Device discovery"
-            running = "The application is running"
-            stopped = "The application has stopped"
+            running = "is running"
+            stopped = "has stopped"
             path = "path"
             cannotOpenThisPath = "Cannot open this path"
             successfulAssistance = "We're glad we were able to helped!"
@@ -130,13 +153,13 @@ object R {
             deviceStatus = "Device status"
             deviceName = "Device name"
             deviceAddress = "Device address"
-            deviceMac = "Device MAC address"
+            deviceMac = "MAC address"
             discoverDevices = "Discover devices"
             confirmationDialog = "Are you sure you want to exit?"
             helpDialogTitle = "Help"
             helpDialogMsg = "Was this helpful?"
             preferencesDialogTitle = "Preferences"
-            preferencesDialogMsg = "This dialog box is about the settings values."
+            wifiDialog = "Information about the WIFI network."
             file = "File"
             newWindow = "New window"
             exit = "Exit"
@@ -152,6 +175,18 @@ object R {
             light = "Light"
             dark = "Dark"
             help = "Help"
+            infoWifi = "Wifi info"
+            displayName = "Display name"
+            name = "Name"
+            address = "Address"
+            index = "Index"
+            mtu = "MTU"
+            hardwareAddress = "Hardware address"
+            networks = "Network information"
+            devices = "Devices"
+            unknown = "Unknown"
+            interfaceName = "Interface name"
+            network = "Network"
         }
     }
 }
