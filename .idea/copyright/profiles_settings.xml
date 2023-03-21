@@ -1,3 +1,7 @@
 <component name="CopyrightManager">
-  <settings default="ted" />
+  <settings default="ted">
+    <module2copyright>
+      <element module="Project Files" copyright="ted" />
+    </module2copyright>
+  </settings>
 </component>

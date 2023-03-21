@@ -1,5 +1,8 @@
 /*
- * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
+ * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and
+ * is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution,
+ * or other use of DCCTech's intellectual property without prior written consent is strictly prohibited.
+ *
  */
 
 package io.dcctech.lan.spy.desktop.window
@@ -8,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Notification
 import androidx.compose.ui.window.WindowPlacement
 import androidx.compose.ui.window.WindowState
@@ -37,7 +42,7 @@ class LanSpyDesktopWindowState(
     path: Path?,
     private val exit: (LanSpyDesktopWindowState) -> Unit
 ) {
-    val window = WindowState()
+    val window = WindowState( size =  DpSize(1200.dp, 800.dp))
     var listOfClients: MutableMap<String, Client> = mutableStateMapOf()
     var networkList: MutableMap<String, NetworkService> = mutableStateMapOf()
     val exitDialog = DialogState<AlertDialogResult>()
@@ -87,9 +92,11 @@ class LanSpyDesktopWindowState(
     and setProcessState to indicate that the discovery process is currently running.
      */
     fun start() {
-        isRunning = true
-        setProcessState(R.running)
-        getNetworkInformation(this)
+        this.scope.launch {
+            isRunning = true
+            setProcessState(R.running)
+            getNetworkInformation(this@LanSpyDesktopWindowState)
+        }
     }
 
     /**
@@ -133,7 +140,6 @@ class LanSpyDesktopWindowState(
         while (scope.isActive) {
             try {
                 delay(application.settings.delayedCheck)
-                getNetworkInformation(this)
                 listOfClients.plus(checkEntity(listOfClients))
                 networkList.plus(checkEntity(networkList))
             } catch (t: Throwable) {

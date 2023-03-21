@@ -1,5 +1,8 @@
 /*
- * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
+ * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and
+ * is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution,
+ * or other use of DCCTech's intellectual property without prior written consent is strictly prohibited.
+ *
  */
 package io.dcctech.lan.spy.desktop.utils
 
@@ -15,6 +18,7 @@ import io.dcctech.lan.spy.desktop.data.LogLevel
 import io.dcctech.lan.spy.desktop.data.NetworkService
 import io.dcctech.lan.spy.desktop.data.Status
 import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
+import kotlinx.coroutines.delay
 import java.net.NetworkInterface
 import java.time.Instant
 import java.time.ZoneId
@@ -60,51 +64,56 @@ The function retrieves network interfaces and their corresponding IP addresses, 
 For each valid IP address, it adds a new client or network service to the result list of the application state.
 Note that this function does not return anything, it only updates the state of the application.
  */
-fun getNetworkInformation(state: LanSpyDesktopWindowState) {
+suspend fun getNetworkInformation(state: LanSpyDesktopWindowState) {
 
-    try {
-        val interfaces = NetworkInterface.getNetworkInterfaces()
+        while (state.isRunning) {
+            try {
+                val interfaces = NetworkInterface.getNetworkInterfaces()
 
-        for (intf in interfaces) {
-            val addresses = intf.inetAddresses
-            for (addr in addresses) {
-                if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
-                    val client = Client(
-                        status = Status.VISIBLE,
-                        name = addr.hostName,
-                        interfaceName = intf.displayName,
-                        address = addr.hostAddress,
-                        mac = addr.address.getMac(),
-                        lastTime = Instant.now()
-                    )
+                for (intf in interfaces) {
+                    val addresses = intf.inetAddresses
+                    for (addr in addresses) {
+                        if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
+                            val client = Client(
+                                status = Status.VISIBLE,
+                                name = addr.hostName,
+                                interfaceName = intf.displayName,
+                                address = addr.hostAddress,
+                                mac = addr.address.getMac(),
+                                lastTime = Instant.now()
+                            )
 
-                    // All discovered clients have been set in the state variable
-                    state.addDeviceToResult(client)
+                            // All discovered clients have been set in the state variable
+                            state.addDeviceToResult(client)
 
-                    LogLevel.DEBUG.log(client.toString())
-                } else {
-                    val networkService = NetworkService(
-                        displayName = intf.displayName,
-                        index = "${intf.index}",
-                        hardwareAddress = intf.hardwareAddress.getMac(),
-                        mtu = intf.mtu,
-                        address = intf.inetAddresses().toString(),
-                        lastTime = Instant.now(),
-                        status = Status.VISIBLE,
-                        name = intf.name,
-                        mac = intf.hardwareAddress.getMac()
+                            LogLevel.DEBUG.log(client.toString())
+                        } else {
+                            val networkService = NetworkService(
+                                displayName = intf.displayName,
+                                index = "${intf.index}",
+                                hardwareAddress = intf.hardwareAddress.getMac(),
+                                mtu = intf.mtu,
+                                address = intf.inetAddresses().toString(),
+                                lastTime = Instant.now(),
+                                status = Status.VISIBLE,
+                                name = intf.name,
+                                mac = intf.hardwareAddress.getMac()
 
-                    )
-                    // All discovered network service have been set in the state variable
-                    state.addNetwork(networkService)
-                    LogLevel.DEBUG.log(networkService.toString())
+                            )
+                            // All discovered network service have been set in the state variable
+                            state.addNetwork(networkService)
+                            LogLevel.DEBUG.log(networkService.toString())
 
+                        }
+                    }
                 }
+
+                delay(state.application.settings.delayInDiscovery)
+
+            } catch (t: Throwable) {
+                LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
         }
-    } catch (t: Throwable) {
-        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
-    }
 
 }
 
