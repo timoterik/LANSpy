@@ -17,6 +17,12 @@ import io.dcctech.lan.spy.desktop.common.ResName
 import io.dcctech.lan.spy.desktop.window.LANSpyDesktopWindow
 import kotlinx.coroutines.launch
 
+
+/**
+A composable function that represents a desktop application.
+It creates an application tray if tray is enabled and windows are not empty.
+@param state The state of the desktop application.
+ */
 @Composable
 fun ApplicationScope.DesktopApplication(state: DesktopApplicationState) {
     if (state.settings.isTrayEnabled && state.windows.isNotEmpty()) {
@@ -30,8 +36,14 @@ fun ApplicationScope.DesktopApplication(state: DesktopApplicationState) {
     }
 }
 
+/**
+
+A composable function that represents the application tray.
+It creates a Tray composable with the application icon, the state of the tray, the tooltip text, and the application menu.
+@param state The state of the desktop application.
+ */
 @Composable
-private fun ApplicationScope.ApplicationTray(state: DesktopApplicationState) {
+fun ApplicationScope.ApplicationTray(state: DesktopApplicationState) {
 
     Tray(
         icon = LocalAppResources.current.res[ResName.DCCTECH_LOGO]
@@ -42,8 +54,13 @@ private fun ApplicationScope.ApplicationTray(state: DesktopApplicationState) {
     )
 }
 
+/**
+A composable function that creates the application menu.
+It creates a separator and an exit item that triggers the exit function of the DesktopApplicationState.
+@param state The state of the desktop application.
+ */
 @Composable
-private fun MenuScope.ApplicationMenu(state: DesktopApplicationState) {
+fun MenuScope.ApplicationMenu(state: DesktopApplicationState) {
 
     val scope = rememberCoroutineScope()
     fun exit() = scope.launch { state.exit() }

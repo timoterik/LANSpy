@@ -7,6 +7,17 @@ package io.dcctech.lan.spy.desktop.data
 import java.time.Instant
 
 
+/**
+
+Data class representing a client device discovered on the network.
+Inherits from the Ssdp class and adds an interface name property.
+@property interfaceName the name of the network interface on which the client was discovered
+@property name the name of the client device
+@property address the IP address of the client device
+@property mac the MAC address of the client device
+@property lastTime the timestamp when the client device was last seen on the network
+@property status the current status of the client device
+ */
 data class Client(
 
     var interfaceName: String,

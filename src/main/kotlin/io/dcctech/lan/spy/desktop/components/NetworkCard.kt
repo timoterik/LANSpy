@@ -12,22 +12,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
-import io.dcctech.lan.spy.desktop.data.NetworkInfo
+import io.dcctech.lan.spy.desktop.data.NetworkService
 
 @Composable
 fun NetworkCard(
-    networkInfo: NetworkInfo
+    networkService: NetworkService
 ) {
     Card(
         elevation = 10.dp,
         backgroundColor = Color.Green
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            KeyNValueInRow(key = R.displayName, value = networkInfo.displayName)
-            KeyNValueInRow(key = R.index, value = networkInfo.index)
-            KeyNValueInRow(key = R.mtu, value = networkInfo.mtu.toString())
-            KeyNValueInRow(key = R.hardwareAddress, value = networkInfo.hardwareAddress ?: "")
-            KeyNValueInRow(key = R.address, value = networkInfo.address)
+            KeyNValueInRow(key = R.displayName, value = networkService.displayName)
+            KeyNValueInRow(key = R.index, value = networkService.index)
+            KeyNValueInRow(key = R.mtu, value = networkService.mtu.toString())
+            KeyNValueInRow(key = R.hardwareAddress, value = networkService.hardwareAddress ?: "")
+//            KeyNValueInRow(key = R.address, value = networkService.address)
         }
     }
 }

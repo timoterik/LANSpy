@@ -16,6 +16,15 @@ import io.dcctech.lan.spy.desktop.ui.TwoColumnsLayout
 import io.dcctech.lan.spy.desktop.utils.getAppTitleFromState
 import kotlinx.coroutines.launch
 
+/**
+
+A Composable function that displays the main window of the LANSpy desktop application.
+@param state a LanSpyDesktopWindowState object which holds the current state of the application.
+@return A UI that consists of a title that displays the current status of the discovery process and additional buttons
+which are to modify the application state from the windows menu, a list of discovered network devices and services.
+@see Composable annotation which means it can be used within a Composable function or combined with other Composable
+functions to build a UI.
+ */
 @Composable
 fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
     val scope = rememberCoroutineScope()

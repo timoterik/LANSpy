@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.data.Client
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.utils.getDeviceColorByStatus
+import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.getColorByStatus
 import io.dcctech.lan.spy.desktop.utils.log
 import java.awt.Desktop
 import java.net.URI
@@ -25,7 +25,7 @@ fun ShowDevice(client: Client) {
     Box(
         modifier = Modifier.height(65.dp)
             .fillMaxWidth()
-            .background(color = getDeviceColorByStatus(client)),
+            .background(color = client.getColorByStatus()),
         contentAlignment = Alignment.CenterStart
     ) {
         DeviceCard(client) {

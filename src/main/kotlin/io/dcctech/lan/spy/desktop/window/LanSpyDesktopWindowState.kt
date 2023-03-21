@@ -16,7 +16,7 @@ import io.dcctech.lan.spy.desktop.common.R
 import io.dcctech.lan.spy.desktop.data.AlertDialogResult
 import io.dcctech.lan.spy.desktop.data.Client
 import io.dcctech.lan.spy.desktop.data.LogLevel
-import io.dcctech.lan.spy.desktop.data.NetworkInfo
+import io.dcctech.lan.spy.desktop.data.NetworkService
 import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.checkEntity
 import io.dcctech.lan.spy.desktop.utils.DialogState
 import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
@@ -24,6 +24,14 @@ import io.dcctech.lan.spy.desktop.utils.log
 import kotlinx.coroutines.*
 import java.nio.file.Path
 
+
+/**
+A class representing the window state of the LanSpy desktop application. This class contains the application state,
+a path to a file, and a callback function for handling window exits.
+@property application The state of the LanSpy desktop application.
+@property path The path to a file.
+@property exit The callback function for handling window exits.
+ */
 class LanSpyDesktopWindowState(
     val application: DesktopApplicationState,
     path: Path?,
@@ -31,7 +39,7 @@ class LanSpyDesktopWindowState(
 ) {
     val window = WindowState()
     var listOfClients: MutableMap<String, Client> = mutableStateMapOf()
-    var networkList: MutableMap<String, NetworkInfo> = mutableStateMapOf()
+    var networkList: MutableMap<String, NetworkService> = mutableStateMapOf()
     val exitDialog = DialogState<AlertDialogResult>()
     val helpDialog = DialogState<AlertDialogResult>()
     val wifiDialog = DialogState<AlertDialogResult>()
@@ -46,6 +54,10 @@ class LanSpyDesktopWindowState(
     var path by mutableStateOf(path)
         private set
 
+    /**
+    A boolean flag indicating the current state of the discovery process.
+    If true, the process is currently running; if false, it is not.
+     */
     var isRunning by mutableStateOf(false)
         private set
 
@@ -59,6 +71,9 @@ class LanSpyDesktopWindowState(
         }
 
 
+    /**
+    Toggles the fullscreen mode of the current window.
+     */
     fun toggleFullscreen() {
         window.placement = if (window.placement == WindowPlacement.Fullscreen) {
             WindowPlacement.Floating
@@ -67,18 +82,30 @@ class LanSpyDesktopWindowState(
         }
     }
 
+    /**
+    Starts the discovery process for devices or network services. This function sets the state variables isRunning
+    and setProcessState to indicate that the discovery process is currently running.
+     */
     fun start() {
         isRunning = true
         setProcessState(R.running)
         getNetworkInformation(this)
     }
 
+    /**
+    Stops the discovery process for devices or network services. This function sets the state variables isRunning
+    and setProcessState to indicate that the discovery process is currently stopped.
+     */
     fun stop() {
         isRunning = false
         setProcessState(R.stopped)
     }
 
-
+    /**
+    Resets the state of the application by removing all devices and network services information from the state.
+    This function can be called when the user wants to start a fresh discovery process or when the current
+    discovery process has ended and the user wants to clear the existing data.
+     */
     fun reset() {
         isRunning = false
         listOfClients = mutableMapOf()
@@ -96,6 +123,12 @@ class LanSpyDesktopWindowState(
         checking()
     }
 
+    /**
+
+    This suspended function that checks the status of all devices or network services in the current state.
+    If necessary, it updates the status of each entity in the state based on the last time it was seen.
+    This function can be called periodically to ensure that the status of all entities is up-to-date.
+     */
     suspend fun checking() {
         while (scope.isActive) {
             try {
@@ -110,7 +143,10 @@ class LanSpyDesktopWindowState(
     }
 
 
-
+    /**
+    Sets the current state of the discovery process.
+    @param status A string representation of the current process state.
+     */
     fun setProcessState(status: String) {
         process = status
     }
@@ -180,8 +216,8 @@ class LanSpyDesktopWindowState(
         listOfClients[client.address] = client
     }
 
-    fun addNetwork(networkInfo: NetworkInfo) {
-        networkList[networkInfo.displayName] = networkInfo
+    fun addNetwork(networkService: NetworkService) {
+        networkList[networkService.displayName] = networkService
     }
 
     private suspend fun areYouSure(): Boolean {

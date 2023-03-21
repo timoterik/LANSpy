@@ -4,6 +4,14 @@
 
 package io.dcctech.lan.spy.desktop.data
 
+/**
+
+An enumeration class that represents the status of a network device or service.
+There are three possible values for the status: VISIBLE, INVISIBLE, and GONE.
+VISIBLE means the device or service is currently visible on the network,
+INVISIBLE means it is not currently visible but was previously discovered,
+and GONE means it is no longer available on the network.
+ */
 enum class Status {
     VISIBLE, INVISIBLE, GONE
 }

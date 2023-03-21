@@ -8,8 +8,20 @@ import io.dcctech.lan.spy.desktop.common.R
 import java.time.Instant
 
 
-data class NetworkInfo(
+/**
 
+A data class that represents a network service.
+@property displayName The display name of the network service.
+@property index The index of the network service.
+@property hardwareAddress The hardware address of the network service.
+@property mtu The MTU of the network service.
+@property address The IP address of the network service.
+@property lastTime The last time the network service was seen.
+@property status The status of the network service.
+@property name The name of the network service.
+@property mac The MAC address of the network service.
+ */
+data class NetworkService(
 
     var displayName: String,
     val index: String,
@@ -24,7 +36,7 @@ data class NetworkInfo(
 ) : Ssdp(status, name, address, mac, lastTime) {
 
     override fun toString(): String {
-        return "Network: display name=$displayName; index=$index, " +
+        return "Network service: display name=$displayName; index=$index, " +
                 "hardware address:${hardwareAddress ?: R.unknown}; MTU=$mtu; addresses: [${address}]"
     }
 }

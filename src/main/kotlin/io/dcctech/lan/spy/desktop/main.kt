@@ -15,6 +15,11 @@ fun main() = application {
     MaterialTheme(
         colors = darkColors()
     ) {
+        /*
+        * This code creates a CompositionLocalProvider composable that provides the LocalAppResources with
+        * the rememberAppResources() value. Then, it calls the DesktopApplication composable with
+        * the rememberApplicationState() value as a parameter,
+        * which creates a desktop application with its corresponding tray and windows.*/
         CompositionLocalProvider(LocalAppResources provides rememberAppResources()) {
             DesktopApplication(rememberApplicationState())
         }

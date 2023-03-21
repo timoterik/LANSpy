@@ -18,11 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import io.dcctech.lan.spy.desktop.data.NetworkInfo
+import io.dcctech.lan.spy.desktop.data.NetworkService
 
 
 @Composable
-fun NetworkList(list: List<NetworkInfo>) {
+fun NetworkList(list: List<NetworkService>) {
     Box {
 
         val state = rememberLazyListState()

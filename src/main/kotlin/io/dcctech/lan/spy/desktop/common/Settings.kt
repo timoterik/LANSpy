@@ -7,8 +7,19 @@ package io.dcctech.lan.spy.desktop.common
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import io.dcctech.lan.spy.desktop.common.theme.DarkColors
+import io.dcctech.lan.spy.desktop.common.theme.LightColors
 
+/**
+
+A class representing the application settings. This class contains various configuration parameters for the application.
+@property inetAddress The IP address used for multicast communication.
+@property port The port used for multicast communication.
+@property searchNetworkInfoDelay The delay in milliseconds between searching for network information.
+@property delayedCheck The delay in milliseconds between delayed checks of network information.
+@property timeout The timeout in milliseconds for network communication.
+@property isTrayEnabled A flag indicating whether the application should be enabled in the system tray.
+@property theme The color theme used by the application.
+ */
 class Settings {
     var inetAddress by mutableStateOf("224.0.0.3")
         private set
@@ -27,5 +38,5 @@ class Settings {
     var isTrayEnabled by mutableStateOf(true)
         private set
 
-    var theme by mutableStateOf(DarkColors)
+    var theme by mutableStateOf(LightColors)
 }

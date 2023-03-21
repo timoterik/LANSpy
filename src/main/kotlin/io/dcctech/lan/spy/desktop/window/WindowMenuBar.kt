@@ -19,6 +19,13 @@ import io.dcctech.lan.spy.desktop.utils.showNotification
 import kotlinx.coroutines.launch
 import java.awt.event.KeyEvent
 
+
+/**
+
+A composable function that creates a menu bar for the window.
+@param state The state of the LanSpy desktop window.
+@throws IllegalStateException if ExperimentalComposeUiApi is not opt-in.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun FrameWindowScope.WindowMenuBar(state: LanSpyDesktopWindowState) = MenuBar {
