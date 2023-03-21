@@ -17,7 +17,7 @@ import io.dcctech.lan.spy.desktop.common.theme.LightColors
 A class representing the application settings. This class contains various configuration parameters for the application.
 @property inetAddress The IP address used for multicast communication.
 @property port The port used for multicast communication.
-@property searchNetworkInfoDelay The delay in milliseconds between searching for network information.
+@property delayInDiscovery The delay in milliseconds between searching for network services or devices.
 @property delayedCheck The delay in milliseconds between delayed checks of network information.
 @property timeout The timeout in milliseconds for network communication.
 @property isTrayEnabled A flag indicating whether the application should be enabled in the system tray.
@@ -29,7 +29,7 @@ class Settings {
     var port by mutableStateOf(5000)
         private set
 
-    var searchNetworkInfoDelay by mutableStateOf(1000L)
+    var delayInDiscovery by mutableStateOf(1000L)
         private set
 
     var delayedCheck by mutableStateOf(5000L)
