@@ -30,7 +30,6 @@ fun NetworkCard(
             KeyNValueInRow(key = R.index, value = networkService.index)
             KeyNValueInRow(key = R.mtu, value = networkService.mtu.toString())
             KeyNValueInRow(key = R.hardwareAddress, value = networkService.hardwareAddress ?: "")
-//            KeyNValueInRow(key = R.address, value = networkService.address)
         }
     }
 }

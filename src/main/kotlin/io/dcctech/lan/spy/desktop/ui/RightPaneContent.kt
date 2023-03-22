@@ -26,7 +26,7 @@ import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
 fun RightPaneContent(state: LanSpyDesktopWindowState) {
     Column(
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.Start,
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
             .padding(20.dp)

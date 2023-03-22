@@ -18,7 +18,9 @@ import io.dcctech.lan.spy.desktop.data.LogLevel
 import io.dcctech.lan.spy.desktop.data.NetworkService
 import io.dcctech.lan.spy.desktop.data.Status
 import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.withContext
 import java.net.NetworkInterface
 import java.time.Instant
 import java.time.ZoneId
@@ -66,54 +68,56 @@ Note that this function does not return anything, it only updates the state of t
  */
 suspend fun getNetworkInformation(state: LanSpyDesktopWindowState) {
 
-        while (state.isRunning) {
-            try {
-                val interfaces = NetworkInterface.getNetworkInterfaces()
+    while (state.isRunning) {
+        try {
+            val interfaces = withContext(Dispatchers.IO) {
+                NetworkInterface.getNetworkInterfaces()
+            }
 
-                for (intf in interfaces) {
-                    val addresses = intf.inetAddresses
-                    for (addr in addresses) {
-                        if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
-                            val client = Client(
-                                status = Status.VISIBLE,
-                                name = addr.hostName,
-                                interfaceName = intf.displayName,
-                                address = addr.hostAddress,
-                                mac = addr.address.getMac(),
-                                lastTime = Instant.now()
-                            )
+            for (intf in interfaces) {
+                val addresses = intf.inetAddresses
+                for (addr in addresses) {
+                    if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
+                        val client = Client(
+                            status = Status.VISIBLE,
+                            name = addr.hostName,
+                            interfaceName = intf.displayName,
+                            address = addr.hostAddress,
+                            mac = addr.address.getMac(),
+                            lastTime = Instant.now()
+                        )
 
-                            // All discovered clients have been set in the state variable
-                            state.addDeviceToResult(client)
+                        // All discovered clients have been set in the state variable
+                        state.addDeviceToResult(client)
 
-                            LogLevel.DEBUG.log(client.toString())
-                        } else {
-                            val networkService = NetworkService(
-                                displayName = intf.displayName,
-                                index = "${intf.index}",
-                                hardwareAddress = intf.hardwareAddress.getMac(),
-                                mtu = intf.mtu,
-                                address = intf.inetAddresses().toString(),
-                                lastTime = Instant.now(),
-                                status = Status.VISIBLE,
-                                name = intf.name,
-                                mac = intf.hardwareAddress.getMac()
+                        LogLevel.DEBUG.log(client.toString())
+                    } else {
+                        val networkService = NetworkService(
+                            displayName = intf.displayName,
+                            index = "${intf.index}",
+                            hardwareAddress = intf.hardwareAddress.getMac(),
+                            mtu = intf.mtu,
+                            address = intf.inetAddresses().toString(),
+                            lastTime = Instant.now(),
+                            status = Status.VISIBLE,
+                            name = intf.name,
+                            mac = intf.hardwareAddress.getMac()
 
-                            )
-                            // All discovered network service have been set in the state variable
-                            state.addNetwork(networkService)
-                            LogLevel.DEBUG.log(networkService.toString())
+                        )
+                        // All discovered network service have been set in the state variable
+                        state.addNetwork(networkService)
+                        LogLevel.DEBUG.log(networkService.toString())
 
-                        }
                     }
                 }
-
-                delay(state.application.settings.delayInDiscovery)
-
-            } catch (t: Throwable) {
-                LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
+
+            delay(state.application.settings.delayInDiscovery)
+
+        } catch (t: Throwable) {
+            LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
         }
+    }
 
 }
 

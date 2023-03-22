@@ -92,10 +92,11 @@ class LanSpyDesktopWindowState(
     and setProcessState to indicate that the discovery process is currently running.
      */
     fun start() {
-        this.scope.launch {
+        scope.launch {
             isRunning = true
             setProcessState(R.running)
             getNetworkInformation(this@LanSpyDesktopWindowState)
+
         }
     }
 
@@ -229,14 +230,8 @@ class LanSpyDesktopWindowState(
     private suspend fun areYouSure(): Boolean {
         return if (isRunning || listOfClients.isNotEmpty()) {
             when (exitDialog.awaitResult()) {
-                AlertDialogResult.Yes -> {
-                    true
-                }
-
-                AlertDialogResult.No -> {
-                    false
-                }
-
+                AlertDialogResult.Yes -> true
+                AlertDialogResult.No -> false
                 AlertDialogResult.Cancel -> false
             }
         } else {
