@@ -25,24 +25,22 @@ import io.dcctech.lan.spy.desktop.data.NetworkService
 import io.dcctech.lan.spy.desktop.data.Ssdp.Companion.checkEntity
 import io.dcctech.lan.spy.desktop.utils.DialogState
 import io.dcctech.lan.spy.desktop.utils.getNetworkInformation
+import io.dcctech.lan.spy.desktop.utils.io
 import io.dcctech.lan.spy.desktop.utils.log
 import kotlinx.coroutines.*
-import java.nio.file.Path
 
 
 /**
 A class representing the window state of the LanSpy desktop application. This class contains the application state,
 a path to a file, and a callback function for handling window exits.
 @property application The state of the LanSpy desktop application.
-@property path The path to a file.
 @property exit The callback function for handling window exits.
  */
 class LanSpyDesktopWindowState(
     val application: DesktopApplicationState,
-    path: Path?,
     private val exit: (LanSpyDesktopWindowState) -> Unit
 ) {
-    val window = WindowState( size =  DpSize(1200.dp, 800.dp))
+    val window = WindowState(size = DpSize(1200.dp, 800.dp))
     var listOfClients: MutableMap<String, Client> = mutableStateMapOf()
     var networkList: MutableMap<String, NetworkService> = mutableStateMapOf()
     val exitDialog = DialogState<AlertDialogResult>()
@@ -54,9 +52,6 @@ class LanSpyDesktopWindowState(
     var notification: Notification? = null
 
     var process by mutableStateOf("")
-        private set
-
-    var path by mutableStateOf(path)
         private set
 
     /**
@@ -92,11 +87,10 @@ class LanSpyDesktopWindowState(
     and setProcessState to indicate that the discovery process is currently running.
      */
     fun start() {
-        scope.launch {
             isRunning = true
             setProcessState(R.running)
+        io {
             getNetworkInformation(this@LanSpyDesktopWindowState)
-
         }
     }
 
@@ -122,12 +116,7 @@ class LanSpyDesktopWindowState(
     }
 
     suspend fun run() {
-        if (path != null) {
-            LogLevel.INFO.log("${R.path}: $path")
-            open(path!!)
-        } else {
-            initNew()
-        }
+        initNew()
         checking()
     }
 
@@ -161,18 +150,6 @@ class LanSpyDesktopWindowState(
     fun createNotification(title: String, msg: String, type: Notification.Type = Notification.Type.Info) {
         application.tray.sendNotification(Notification(title = title, message = msg, type = type))
         notification = Notification(title = title, message = msg, type = type)
-    }
-
-    private fun open(path: Path) {
-        isInit = false
-        this.path = path
-        try {
-            isInit = true
-        } catch (e: Exception) {
-            val msg = "${R.cannotOpenThisPath}: $path"
-            text = msg
-            LogLevel.ERROR.log("$msg \n ${e.printStackTrace()}")
-        }
     }
 
     private fun initNew() {
