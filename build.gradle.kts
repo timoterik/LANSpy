@@ -1,5 +1,8 @@
 /*
- * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties.
+ * A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and
+ * is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution,
+ * or other use of DCCTech's intellectual property without prior written consent is strictly prohibited.
+ *
  */
 
 import org.jetbrains.compose.compose
@@ -7,11 +10,11 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0"
+    kotlin("jvm")
+    id("org.jetbrains.compose")
 }
 
-group = "io.dcctech.LANSpy.desktop"
+group = "io.dcctech.lan.spy.desktop"
 version = "2023.3.10"
 
 repositories {
@@ -21,8 +24,6 @@ repositories {
 }
 
 dependencies {
-    implementation("com.isupatches:wisefy:4.0.0")
-    testImplementation(kotlin("test"))
     implementation(compose.desktop.currentOs)
     implementation(compose.materialIconsExtended)
 }
@@ -32,7 +33,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "16"
+    kotlinOptions.jvmTarget = "17"
 }
 
 compose.desktop {
@@ -40,7 +41,14 @@ compose.desktop {
         mainClass = "io.dcctech.lan.spy.desktop.Application.kt"
         nativeDistributions {
             //https://github.com/JetBrains/compose-jb/blob/master/tutorials/Native_distributions_and_local_execution/README.md
-            javaHome = System.getenv("JDK_16")
+            javaHome = System.getenv("JDK_17")
+            packageName = "LANSpy-desktop"
+            packageVersion = "1.0.0"
+            copyright =
+                "A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and " +
+                        "is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, " +
+                        "or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. "
+            appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
             nativeDistributions {
                 targetFormats(TargetFormat.Exe, TargetFormat.Rpm, TargetFormat.Msi, TargetFormat.Deb)
                 macOS {
@@ -60,11 +68,7 @@ compose.desktop {
                     iconFile.set(project.file("src/main/resources/Color-dcctech-no-bg.png"))
                     shortcut = true
                 }
-                packageName = "LANSpy-desktop"
-                packageVersion = "1.0.0"
-                copyright =
-                    "A DCCTech © 2022 - 2023 All Rights Reserved. This copyright notice is the exclusive property of DCCTech and is hereby granted to users for use of DCCTech's intellectual property. Any reproduction, modification, distribution, or other use of DCCTech's intellectual property without prior written consent is strictly prohibited. DCCTech reserves the right to pursue legal action against any infringing parties."
-                appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
+
             }
         }
     }

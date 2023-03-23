@@ -87,9 +87,9 @@ class LanSpyDesktopWindowState(
     and setProcessState to indicate that the discovery process is currently running.
      */
     fun start() {
+        io {
             isRunning = true
             setProcessState(R.running)
-        io {
             getNetworkInformation(this@LanSpyDesktopWindowState)
         }
     }

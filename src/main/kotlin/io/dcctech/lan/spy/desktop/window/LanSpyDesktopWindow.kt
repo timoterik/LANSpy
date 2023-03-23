@@ -66,7 +66,7 @@ fun LANSpyDesktopWindow(state: LanSpyDesktopWindowState) {
         if (state.wifiDialog.isAwaiting) {
             DialogBox(
                 title = R.wifiDialog,
-                message = state.networkList.map { it.toString() }.joinToString { "\n" },
+                message = R.networks,
                 onResult = {
                     state.wifiDialog.onResult(it)
                 },
