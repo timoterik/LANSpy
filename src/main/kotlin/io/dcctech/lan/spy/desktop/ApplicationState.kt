@@ -48,7 +48,6 @@ class DesktopApplicationState {
         _windows.add(
             LanSpyDesktopWindowState(
                 application = this,
-                path = null,
                 exit = _windows::remove
             )
         )

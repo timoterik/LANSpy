@@ -18,7 +18,7 @@ import io.dcctech.lan.spy.desktop.data.LogLevel
 import io.dcctech.lan.spy.desktop.data.NetworkService
 import io.dcctech.lan.spy.desktop.data.Status
 import io.dcctech.lan.spy.desktop.window.LanSpyDesktopWindowState
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import java.net.NetworkInterface
 import java.time.Instant
 import java.time.ZoneId
@@ -27,7 +27,14 @@ import javax.swing.JOptionPane
 
 
 /**
+Prints an error message to the standard error output stream.
+@param errorMsg the error message to print
+ */
+fun printErr(errorMsg:String){
+    System.err.println(errorMsg)
+}
 
+/**
 Retrieves the application title from the given LanSpyDesktopWindowState object.
 The title is composed of the application name and the current status of the discovery process.
 @param state The LanSpyDesktopWindowState object that contains the current state of the application.
@@ -48,13 +55,16 @@ var formatter: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm
 
 /**
 Logs a message with this log level to the console.
-This function is an extension function for the enum class LogLevel. It allows logging messages with different log levels
-to the console by calling the log() function on a LogLevel instance, passing the message as an argument.
-The function concatenates the log level and the message, separated by a colon, and prints the resulting string to the console.
+This function extends the LogLevel enum with a log function, which takes in a string parameter msg that represents
+the message to be logged. The function checks the log level and prints the message to either the standard output stream
+or the standard error output stream using the println(msg: String) or printErr(msg: String) -> System.err.println(msg: String) functions.
 @param msg The message is to be logged.
  */
 fun LogLevel.log(msg: String) {
-    println("$this: $msg")
+    when{
+        (this in listOf(LogLevel.CRITICAL, LogLevel.ERROR) ) -> printErr("$this: $msg")
+        else -> println("$this: $msg")
+    }
 }
 
 /**
@@ -66,54 +76,56 @@ Note that this function does not return anything, it only updates the state of t
  */
 suspend fun getNetworkInformation(state: LanSpyDesktopWindowState) {
 
-        while (state.isRunning) {
-            try {
-                val interfaces = NetworkInterface.getNetworkInterfaces()
+    while (state.isRunning) {
+        try {
+            val interfaces = withContext(Dispatchers.IO) {
+                NetworkInterface.getNetworkInterfaces()
+            }
 
-                for (intf in interfaces) {
-                    val addresses = intf.inetAddresses
-                    for (addr in addresses) {
-                        if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
-                            val client = Client(
-                                status = Status.VISIBLE,
-                                name = addr.hostName,
-                                interfaceName = intf.displayName,
-                                address = addr.hostAddress,
-                                mac = addr.address.getMac(),
-                                lastTime = Instant.now()
-                            )
+            for (intf in interfaces) {
+                val addresses = intf.inetAddresses
+                for (addr in addresses) {
+                    if (!addr.isLinkLocalAddress && !addr.isLoopbackAddress) {
+                        val client = Client(
+                            status = Status.VISIBLE,
+                            name = addr.hostName,
+                            interfaceName = intf.displayName,
+                            address = addr.hostAddress,
+                            mac = addr.address.getMac(),
+                            lastTime = Instant.now()
+                        )
 
-                            // All discovered clients have been set in the state variable
-                            state.addDeviceToResult(client)
+                        // All discovered clients have been set in the state variable
+                        state.addDeviceToResult(client)
 
-                            LogLevel.DEBUG.log(client.toString())
-                        } else {
-                            val networkService = NetworkService(
-                                displayName = intf.displayName,
-                                index = "${intf.index}",
-                                hardwareAddress = intf.hardwareAddress.getMac(),
-                                mtu = intf.mtu,
-                                address = intf.inetAddresses().toString(),
-                                lastTime = Instant.now(),
-                                status = Status.VISIBLE,
-                                name = intf.name,
-                                mac = intf.hardwareAddress.getMac()
+                        LogLevel.DEBUG.log(client.toString())
+                    } else {
+                        val networkService = NetworkService(
+                            displayName = intf.displayName,
+                            index = "${intf.index}",
+                            hardwareAddress = intf.hardwareAddress.getMac(),
+                            mtu = intf.mtu,
+                            address = intf.inetAddresses().toString(),
+                            lastTime = Instant.now(),
+                            status = Status.VISIBLE,
+                            name = intf.name,
+                            mac = intf.hardwareAddress.getMac()
 
-                            )
-                            // All discovered network service have been set in the state variable
-                            state.addNetwork(networkService)
-                            LogLevel.DEBUG.log(networkService.toString())
+                        )
+                        // All discovered network service have been set in the state variable
+                        state.addNetwork(networkService)
+                        LogLevel.DEBUG.log(networkService.toString())
 
-                        }
                     }
                 }
-
-                delay(state.application.settings.delayInDiscovery)
-
-            } catch (t: Throwable) {
-                LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
             }
+
+            delay(state.application.settings.delayInDiscovery)
+
+        } catch (t: Throwable) {
+            LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
         }
+    }
 
 }
 
@@ -139,3 +151,19 @@ fun showNotification(title: String, message: String) {
 
 @Composable
 fun title(title: String) = Text(textAlign = TextAlign.Center, text = title, modifier = Modifier.padding(5.dp))
+
+
+
+/**
+A function that takes a suspendable function and launches it in a new coroutine scope using the GlobalScope.
+Exceptions inside the function are caught and logged in the standard error output stream.
+@param func The suspendable function to be launched.
+ */
+@OptIn(DelicateCoroutinesApi::class)
+fun io(func: suspend () -> Unit) = GlobalScope.launch {
+    try {
+        func()
+    } catch (t: Throwable) {
+        LogLevel.ERROR.log("${t.localizedMessage}\n ${t.printStackTrace()}")
+    }
+}
